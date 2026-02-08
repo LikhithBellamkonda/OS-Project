@@ -1,0 +1,2452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Management Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --dark: #1a252f;
+            --light: #ecf0f1;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--light);
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .card-title {
+            color: var(--primary);
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+        }
+
+        .btn-danger {
+            background: var(--accent);
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .menu-item {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: var(--light);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: var(--secondary);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .menu-item.active {
+            background: var(--secondary);
+            color: white;
+            border-left-color: var(--warning);
+        }
+
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .frame {
+            background: var(--light);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .frame.free {
+            background: #d5f4e6;
+            border-color: var(--success);
+        }
+
+        .frame.used {
+            background: #fadbd8;
+            border-color: var(--accent);
+        }
+
+        .frame.selected {
+            background: #fef9e7;
+            border-color: var(--warning);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(243, 156, 18, 0.5);
+        }
+
+        .frame-header {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .frame-content {
+            font-size: 0.9rem;
+            color: var(--dark);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .badge-success {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+
+        .badge-danger {
+            background: #fadbd8;
+            color: #c0392b;
+        }
+
+        .badge-warning {
+            background: #fef9e7;
+            color: #f39c12;
+        }
+
+        .badge-info {
+            background: #e8f4fc;
+            color: #2980b9;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+
+        td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid var(--light);
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .statistics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .simulation-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .slider-container {
+            flex: 1;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--light);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--secondary);
+            cursor: pointer;
+        }
+
+        .visualization-area {
+            min-height: 300px;
+            background: var(--light);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .address-translation {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .address-part {
+            padding: 1.5rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .arrow {
+            font-size: 2rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--light);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: #d5f4e6;
+            color: #27ae60;
+            border: 1px solid #2ecc71;
+        }
+
+        .alert-danger {
+            background: #fadbd8;
+            color: #c0392b;
+            border: 1px solid #e74c3c;
+        }
+
+        .log-container {
+            max-height: 300px;
+            overflow-y: auto;
+            background: var(--dark);
+            color: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            font-family: monospace;
+            margin-top: 1rem;
+        }
+
+        .log-entry {
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .log-time {
+            color: #3498db;
+        }
+
+        .log-type {
+            font-weight: bold;
+        }
+
+        .log-type.info {
+            color: #2ecc71;
+        }
+
+        .log-type.warning {
+            color: #f39c12;
+        }
+
+        .log-type.error {
+            color: #e74c3c;
+        }
+
+        /* Page Replacement Table Styles */
+        .replacement-table {
+            width: 100%;
+            margin: 1rem 0;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .replacement-table th {
+            background: #3498db;
+            color: white;
+            padding: 0.8rem;
+            text-align: center;
+            border: 1px solid #2980b9;
+        }
+
+        .replacement-table td {
+            padding: 0.8rem;
+            text-align: center;
+            border: 1px solid #ddd;
+            transition: background-color 0.3s ease;
+        }
+
+        .replacement-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .replacement-table tr:hover td {
+            background-color: #e8f4fc;
+        }
+
+        .hit-cell {
+            background-color: #d5f4e6 !important;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .miss-cell {
+            background-color: #fadbd8 !important;
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .replacement-cell {
+            background-color: #fef9e7 !important;
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .frame-cell {
+            background-color: #e8f4fc !important;
+            color: #2980b9;
+            font-weight: bold;
+        }
+
+        .step-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .step-result {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .step-hit {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+
+        .step-miss {
+            background: #fadbd8;
+            color: #c0392b;
+        }
+
+        .algorithm-summary {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-top: 1rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--light);
+            border-radius: var(--border-radius);
+        }
+
+        .summary-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .frames-input {
+            width: 80px;
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        /* TLB Styles */
+        .tlb-entry {
+            padding: 0.8rem;
+            background: white;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .tlb-entry.valid {
+            border-left-color: #2ecc71;
+            background: #d5f4e6;
+        }
+
+        .tlb-entry.invalid {
+            border-left-color: #e74c3c;
+            background: #fadbd8;
+        }
+
+        .tlb-hit {
+            background-color: #d5f4e6 !important;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .tlb-miss {
+            background-color: #fadbd8 !important;
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .memory-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .address-translation {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .arrow {
+                transform: rotate(90deg);
+            }
+            
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Memory Management Visualizer</h1>
+            <p>Interactive simulation of paging, segmentation, and page replacement algorithms</p>
+        </div>
+
+        <div class="dashboard">
+            <div class="sidebar">
+                <h3 style="color: var(--primary); margin-bottom: 1.5rem;">Navigation</h3>
+                <div class="menu-item active" onclick="showSection('memory')">
+                    <strong>Memory Overview</strong>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">View physical memory layout</p>
+                </div>
+                <div class="menu-item" onclick="showSection('paging')">
+                    <strong>Paging System</strong>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">Page tables & address translation</p>
+                </div>
+                <div class="menu-item" onclick="showSection('segmentation')">
+                    <strong>Segmentation</strong>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">Segment tables & protection</p>
+                </div>
+                <div class="menu-item" onclick="showSection('replacement')">
+                    <strong>Page Replacement</strong>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">FIFO, LRU, OPTIMAL, CLOCK</p>
+                </div>
+                <div class="menu-item" onclick="showSection('processes')">
+                    <strong>Process Management</strong>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">Add/remove processes</p>
+                </div>
+                <div class="menu-item" onclick="showSection('tlb')">
+                    <strong>Translation Lookaside Buffer</strong>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">TLB cache & access time</p>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <h3 style="color: var(--primary); margin-bottom: 1rem;">Quick Actions</h3>
+                    <div class="btn-group">
+                        <button class="btn btn-success btn-small" onclick="resetSimulation()">Reset</button>
+                        <button class="btn btn-primary btn-small" onclick="generateReferenceString()">Generate Ref String</button>
+                        <button class="btn btn-warning btn-small" onclick="addRandomProcess()">Add Random Process</button>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <h3 style="color: var(--primary); margin-bottom: 1rem;">Statistics</h3>
+                    <div class="statistics">
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-hits">0</div>
+                            <div class="stat-label">Page Hits</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-faults">0</div>
+                            <div class="stat-label">Page Faults</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-hitratio">0%</div>
+                            <div class="stat-label">Hit Ratio</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <!-- Memory Overview Section -->
+                <div class="card" id="memory-section">
+                    <div class="card-header">
+                        <h2 class="card-title">Physical Memory Layout</h2>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="refreshMemory()">Refresh</button>
+                            <button class="btn btn-success" onclick="compactMemory()">Compact</button>
+                        </div>
+                    </div>
+                    <div class="memory-grid" id="memory-frames">
+                        <!-- Memory frames will be generated here -->
+                    </div>
+                    <div class="statistics">
+                        <div class="stat-card">
+                            <div class="stat-value" id="total-frames">10</div>
+                            <div class="stat-label">Total Frames</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="used-frames">0</div>
+                            <div class="stat-label">Used Frames</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="free-frames">10</div>
+                            <div class="stat-label">Free Frames</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="utilization">0%</div>
+                            <div class="stat-label">Utilization</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paging System Section -->
+                <div class="card" id="paging-section" style="display: none;">
+                    <div class="card-header">
+                        <h2 class="card-title">Paging System</h2>
+                        <button class="btn btn-primary" onclick="simulateAddressTranslation()">Simulate Translation</button>
+                    </div>
+                    <div class="visualization-area">
+                        <h3 style="color: var(--primary); margin-bottom: 2rem;">Logical to Physical Address Translation</h3>
+                        <div class="address-translation">
+                            <div class="address-part">
+                                <h4>Logical Address</h4>
+                                <div style="font-size: 1.5rem; margin: 1rem 0; font-family: monospace;" id="logical-address">0x0000</div>
+                                <div style="font-size: 0.9rem; color: #7f8c8d;">
+                                    Page: <span id="logical-page">0</span> | Offset: <span id="logical-offset">0</span>
+                                </div>
+                            </div>
+                            <div class="arrow">→</div>
+                            <div class="address-part">
+                                <h4>Physical Address</h4>
+                                <div style="font-size: 1.5rem; margin: 1rem 0; font-family: monospace;" id="physical-address">0x0000</div>
+                                <div style="font-size: 0.9rem; color: #7f8c8d;">
+                                    Frame: <span id="physical-frame">0</span> | Offset: <span id="physical-offset">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- OFFSET INPUT ADDED BACK -->
+                        <div style="margin-top: 1.5rem; width: 100%;">
+                            <div class="form-group">
+                                <label for="custom-offset">Enter Custom Offset (0-4095):</label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <input type="number" id="custom-offset" min="0" max="4095" value="0" style="flex: 1;">
+                                    <button class="btn btn-small" onclick="useCustomOffset()">Use Offset</button>
+                                </div>
+                                <p style="color: #7f8c8d; font-size: 0.85rem; margin-top: 0.5rem;">
+                                    <strong>Offset Explanation:</strong> The offset is the displacement within a page. 
+                                    Since page size is 4KB (4096 bytes), offset can range from 0 to 4095.
+                                </p>
+                            </div>
+                        </div>
+                        <div id="translation-result" class="alert" style="display: none; margin-top: 1rem;"></div>
+                    </div>
+                    <div class="table-container">
+                        <h3 style="color: var(--primary); margin-top: 2rem;">Page Tables</h3>
+                        <div id="page-tables-container">
+                            <!-- Page tables will be generated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Segmentation Section -->
+                <div class="card" id="segmentation-section" style="display: none;">
+                    <div class="card-header">
+                        <h2 class="card-title">Segmentation System</h2>
+                        <button class="btn btn-primary" onclick="simulateSegmentation()">Simulate Access</button>
+                    </div>
+                    <div class="visualization-area">
+                        <h3 style="color: var(--primary); margin-bottom: 1rem;">Segment Table for Process 1</h3>
+                        <div class="table-container">
+                            <table id="segment-table">
+                                <thead>
+                                    <tr>
+                                        <th>Segment</th>
+                                        <th>Base Address</th>
+                                        <th>Limit</th>
+                                        <th>Valid</th>
+                                        <th>Protection</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="segment-table-body">
+                                    <!-- Segment data will be generated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- OFFSET INPUT ADDED BACK -->
+                        <div style="margin-top: 1.5rem; width: 100%;">
+                            <div class="form-group">
+                                <label for="segment-offset">Enter Offset for Selected Segment:</label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <input type="number" id="segment-offset" min="0" value="0" style="flex: 1;">
+                                    <button class="btn btn-small" onclick="useSegmentOffset()">Check Access</button>
+                                </div>
+                                <p style="color: #7f8c8d; font-size: 0.85rem; margin-top: 0.5rem;">
+                                    <strong>What is a Segmentation Fault?</strong> A segmentation fault occurs when a program tries to access memory outside the bounds of a segment (offset exceeds segment limit) or tries to access a segment with invalid permissions (e.g., writing to a read-only segment).
+                                </p>
+                            </div>
+                        </div>
+                        <div id="segmentation-result" class="alert" style="display: none; margin-top: 1rem;"></div>
+                    </div>
+                </div>
+
+                <!-- Page Replacement Section -->
+                <div class="card" id="replacement-section" style="display: none;">
+                    <div class="card-header">
+                        <h2 class="card-title">Page Replacement Algorithms</h2>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="startSimulation('FIFO')">FIFO</button>
+                            <button class="btn btn-success" onclick="startSimulation('LRU')">LRU</button>
+                            <button class="btn btn-warning" onclick="startSimulation('OPTIMAL')">Optimal</button>
+                            <button class="btn btn-danger" onclick="startSimulation('CLOCK')">Clock</button>
+                            <button class="btn btn-small" onclick="stopSimulation()" id="stop-btn" style="display: none;">Stop</button>
+                        </div>
+                    </div>
+                    
+                    <div class="simulation-controls">
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <div class="input-group">
+                                <label for="frames-input">Frames:</label>
+                                <input type="number" id="frames-input" class="frames-input" min="1" max="20" value="4">
+                            </div>
+                            <div class="input-group">
+                                <label for="speed-slider">Speed:</label>
+                                <input type="range" min="100" max="2000" value="1000" class="slider" id="speed-slider" style="width: 150px;">
+                            </div>
+                        </div>
+                        <div>
+                            <label>Reference String:</label>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                <input type="text" id="ref-string" value="7 0 1 2 0 3 0 4 2 3 0 3 2 1 2" style="flex: 1;">
+                                <button class="btn btn-small" onclick="generateReferenceString()">Generate</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="visualization-area">
+                        <div id="algorithm-visualization">
+                            <h3 style="color: var(--primary); margin-bottom: 1rem;">Select an algorithm to start simulation</h3>
+                            <p style="color: #7f8c8d; text-align: center;">
+                                Enter number of frames (1-20), then select an algorithm to start
+                            </p>
+                        </div>
+                        
+                        <!-- Current Step Information -->
+                        <div id="current-step" class="step-info" style="display: none;">
+                            <div class="step-title">Step <span id="step-number">0</span>: Page <span id="step-page">-</span></div>
+                            <div class="step-result" id="step-result-type">-</div>
+                        </div>
+                        
+                        <!-- Page Replacement Table -->
+                        <div id="replacement-table-container" style="width: 100%; display: none;">
+                            <h4 style="color: var(--primary); margin-bottom: 1rem;">Page Replacement Table</h4>
+                            <div class="table-container">
+                                <table class="replacement-table" id="replacement-table">
+                                    <thead>
+                                        <tr id="replacement-table-header">
+                                            <!-- Table header will be generated here -->
+                                        </tr>
+                                    </thead>
+                                    <tbody id="replacement-table-body">
+                                        <!-- Table rows will be generated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Memory Frames Visualization -->
+                        <div id="simulation-frames" class="memory-grid" style="display: none; margin-top: 1rem;">
+                            <!-- Frames will be generated here during simulation -->
+                        </div>
+                        
+                        <!-- Algorithm Summary -->
+                        <div id="algorithm-summary" class="algorithm-summary" style="display: none;">
+                            <h4 style="color: var(--primary); margin-bottom: 1rem;">Algorithm Summary</h4>
+                            <div class="summary-grid">
+                                <div class="summary-item">
+                                    <div class="summary-value" id="summary-hits">0</div>
+                                    <div class="summary-label">Page Hits</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-value" id="summary-faults">0</div>
+                                    <div class="summary-label">Page Faults</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-value" id="summary-hitratio">0%</div>
+                                    <div class="summary-label">Hit Ratio</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-value" id="summary-algorithm">-</div>
+                                    <div class="summary-label">Algorithm</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-value" id="summary-frames">4</div>
+                                    <div class="summary-label">Frames Used</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Process Management Section -->
+                <div class="card" id="processes-section" style="display: none;">
+                    <div class="card-header">
+                        <h2 class="card-title">Process Management</h2>
+                        <button class="btn btn-success" onclick="showAddProcessModal()">Add New Process</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>PID</th>
+                                    <th>Name</th>
+                                    <th>Pages</th>
+                                    <th>Segments</th>
+                                    <th>Memory (KB)</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="process-table-body">
+                                <!-- Process data will be generated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Translation Lookaside Buffer (TLB) Section -->
+                <div class="card" id="tlb-section" style="display: none;">
+                    <div class="card-header">
+                        <h2 class="card-title">Translation Lookaside Buffer (TLB)</h2>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="runTLBSimulation()">Run Simulation</button>
+                            <button class="btn btn-warning" onclick="resetTLB()">Reset TLB</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <h3 style="color: var(--primary); margin-bottom: 1rem;">TLB Configuration</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div class="form-group">
+                                <label for="tlb-size">TLB Entries:</label>
+                                <input type="number" id="tlb-size" min="2" max="32" value="8">
+                            </div>
+                            <div class="form-group">
+                                <label for="tlb-hit-time">TLB Hit Time (ns):</label>
+                                <input type="number" id="tlb-hit-time" min="1" max="100" value="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="tlb-miss-time">Memory Access Time (ns):</label>
+                                <input type="number" id="tlb-miss-time" min="50" max="500" value="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="tlb-ref-string">Page Reference String:</label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <input type="text" id="tlb-ref-string" value="1 2 3 4 1 2 5 6 2 3 7 1 2 3 4" style="flex: 1;">
+                                    <button class="btn btn-small" onclick="generateTLBRefString()">Generate</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TLB Visualization -->
+                    <div style="background: var(--light); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1.5rem;">
+                        <h3 style="color: var(--primary); margin-bottom: 1rem;">Current TLB State</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Entry</th>
+                                        <th>Virtual Page</th>
+                                        <th>Physical Frame</th>
+                                        <th>Valid</th>
+                                        <th>Last Used</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tlb-table-body">
+                                    <!-- TLB entries will be generated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TLB Simulation Results -->
+                    <div style="background: var(--light); border-radius: var(--border-radius); padding: 1.5rem;">
+                        <h3 style="color: var(--primary); margin-bottom: 1rem;">Simulation Results</h3>
+                        
+                        <!-- Current Step -->
+                        <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: var(--border-radius);" id="tlb-current-step">
+                            <strong>Current Step:</strong> <span id="tlb-step-info">-</span>
+                        </div>
+
+                        <!-- Step-by-step table -->
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Step</th>
+                                        <th>Virtual Page</th>
+                                        <th>TLB Result</th>
+                                        <th>Physical Frame</th>
+                                        <th>Access Time (ns)</th>
+                                        <th>Note</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tlb-results-table">
+                                    <!-- Results will be generated here -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Summary Statistics -->
+                        <div class="statistics" style="margin-top: 1.5rem;">
+                            <div class="stat-card">
+                                <div class="stat-value" id="tlb-hits-count">0</div>
+                                <div class="stat-label">TLB Hits</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="tlb-misses-count">0</div>
+                                <div class="stat-label">TLB Misses</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="tlb-hit-ratio">0%</div>
+                                <div class="stat-label">Hit Ratio</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="tlb-avg-time">0 ns</div>
+                                <div class="stat-label">Avg Access Time</div>
+                            </div>
+                        </div>
+
+                        <!-- Comparison Section -->
+                        <div style="margin-top: 1.5rem; padding: 1rem; background: white; border-radius: var(--border-radius); border-left: 4px solid var(--secondary);">
+                            <h4 style="color: var(--primary); margin-bottom: 1rem;">Access Time Comparison</h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                                <div style="text-align: center; padding: 1rem; background: #e8f4fc; border-radius: var(--border-radius);">
+                                    <div style="font-size: 1.3rem; font-weight: bold; color: #2980b9;">WITH TLB</div>
+                                    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #555;">Total Time</div>
+                                    <div style="font-size: 1.8rem; font-weight: bold; color: #2980b9; margin-top: 0.5rem;" id="tlb-total-with">0 ns</div>
+                                    <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #666;">
+                                        Hits: <span id="tlb-with-hits">0</span> × <span id="tlb-with-hit-time">10</span>ns<br>
+                                        Misses: <span id="tlb-with-misses">0</span> × <span id="tlb-with-miss-time">100</span>ns
+                                    </div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background: #fadbd8; border-radius: var(--border-radius);">
+                                    <div style="font-size: 1.3rem; font-weight: bold; color: #c0392b;">WITHOUT TLB</div>
+                                    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #555;">Total Time</div>
+                                    <div style="font-size: 1.8rem; font-weight: bold; color: #c0392b; margin-top: 0.5rem;" id="tlb-total-without">0 ns</div>
+                                    <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #666;">
+                                        All accesses: <span id="tlb-all-accesses">0</span> × <span id="tlb-without-time">100</span>ns
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 1rem; padding: 1rem; background: #d5f4e6; border-radius: var(--border-radius); text-align: center;">
+                                <strong style="color: #27ae60;">Time Saved:</strong> <span id="tlb-time-saved">0</span> ns
+                                <br>
+                                <span style="font-size: 0.9rem; color: #555;">Speedup: <span id="tlb-speedup">1.00</span>x</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Process Modal -->
+    <div class="modal" id="add-process-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Process</h2>
+                <button class="close-modal" onclick="closeAddProcessModal()">×</button>
+            </div>
+            <form id="process-form">
+                <div class="form-group">
+                    <label for="process-name">Process Name</label>
+                    <input type="text" id="process-name" placeholder="Enter process name" required>
+                </div>
+                <div class="form-group">
+                    <label for="num-pages">Number of Pages</label>
+                    <input type="number" id="num-pages" min="1" max="20" value="5" required>
+                </div>
+                <div class="form-group">
+                    <label for="num-segments">Number of Segments</label>
+                    <input type="number" id="num-segments" min="1" max="8" value="3" required>
+                </div>
+                <div class="form-group">
+                    <label for="memory-required">Memory Required (KB)</label>
+                    <input type="number" id="memory-required" min="4" max="64" value="20" required>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%; margin-top: 1rem;">Add Process</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let memory = [];
+        let processes = [];
+        let currentProcessId = 1;
+        let pageHits = 0;
+        let pageFaults = 0;
+        let isSimulating = false;
+        let simulationInterval;
+        let currentAlgorithm = '';
+        let referenceString = [];
+        let simulationIndex = 0;
+        let frameSequence = [];
+        let replacementTable = [];
+        let clockPointer = 0;
+        let simulationMemory = []; // Separate memory for page replacement simulation
+
+        // TLB Variables
+        let tlbEntries = [];
+        let tlbHits = 0;
+        let tlbMisses = 0;
+        let tlbSimulationData = [];
+        let isRunningTLBSimulation = false;
+
+        // Configuration
+        const MAX_PAGES = 20;
+        const MAX_SEGMENTS = 8;
+        const MAX_PROCESSES = 5;
+        const PAGE_SIZE = 4; // KB
+        const PAGE_SIZE_BYTES = PAGE_SIZE * 1024; // 4096 bytes
+
+        // Initialize the system
+        function initSystem() {
+            // Initialize main memory frames (fixed at 10 for other sections)
+            memory = [];
+            for (let i = 0; i < 10; i++) {
+                memory.push({
+                    id: i,
+                    occupied: false,
+                    pageNo: -1,
+                    processId: -1,
+                    referenceBit: 0,
+                    modifyBit: 0,
+                    lastAccess: -1
+                });
+            }
+
+            // Create initial processes
+            processes = [
+                {
+                    id: 1,
+                    name: "System",
+                    pages: 5,
+                    segments: 3,
+                    memory: 20,
+                    status: "Running",
+                    pageTable: generatePageTable(5),
+                    segmentTable: generateSegmentTable(3)
+                }
+            ];
+
+            // Initialize statistics
+            updateStatistics();
+            renderMemoryFrames();
+            renderProcessTable();
+            renderPageTables();
+            renderSegmentTable();
+
+            logEvent('System initialized successfully', 'info');
+        }
+
+        // Generate a page table
+        function generatePageTable(numPages) {
+            const pageTable = [];
+            for (let i = 0; i < numPages; i++) {
+                const isValid = Math.random() > 0.3;
+                let frameNo = -1;
+                if (isValid) {
+                    // Find a free frame
+                    const freeFrame = memory.find(f => !f.occupied);
+                    if (freeFrame) {
+                        frameNo = freeFrame.id;
+                        freeFrame.occupied = true;
+                        freeFrame.pageNo = i;
+                        freeFrame.processId = currentProcessId;
+                        freeFrame.referenceBit = 1;
+                        freeFrame.lastAccess = 0;
+                    }
+                }
+                
+                pageTable.push({
+                    pageNo: i,
+                    valid: isValid && frameNo !== -1,
+                    frameNo: frameNo,
+                    lastUsed: isValid ? 0 : -1,
+                    referenceBit: isValid ? 1 : 0,
+                    modifyBit: Math.random() > 0.5 ? 1 : 0
+                });
+            }
+            return pageTable;
+        }
+
+        // Generate a segment table
+        function generateSegmentTable(numSegments) {
+            const segmentTable = [];
+            let base = 0;
+            for (let i = 0; i < numSegments; i++) {
+                const limit = (Math.floor(Math.random() * 4) + 1) * PAGE_SIZE;
+                segmentTable.push({
+                    segmentNo: i,
+                    base: base,
+                    limit: limit,
+                    valid: true,
+                    protection: ['R', 'W', 'X'][Math.floor(Math.random() * 3)]
+                });
+                base += limit;
+            }
+            return segmentTable;
+        }
+
+        // Render memory frames
+        function renderMemoryFrames() {
+            const container = document.getElementById('memory-frames');
+            container.innerHTML = '';
+            
+            memory.forEach(frame => {
+                const frameDiv = document.createElement('div');
+                frameDiv.className = `frame ${frame.occupied ? 'used' : 'free'}`;
+                frameDiv.innerHTML = `
+                    <div class="frame-header">Frame ${frame.id}</div>
+                    <div class="frame-content">
+                        ${frame.occupied ? 
+                            `Process: ${frame.processId}<br>
+                             Page: ${frame.pageNo}<br>
+                             R-bit: ${frame.referenceBit}<br>
+                             M-bit: ${frame.modifyBit}` 
+                            : 'FREE'}
+                    </div>
+                    ${frame.occupied ? '<div class="status-badge badge-danger">Used</div>' : 
+                                       '<div class="status-badge badge-success">Free</div>'}
+                `;
+                container.appendChild(frameDiv);
+            });
+            
+            updateMemoryStats();
+        }
+
+        // Update memory statistics
+        function updateMemoryStats() {
+            const usedFrames = memory.filter(f => f.occupied).length;
+            const freeFrames = 10 - usedFrames;
+            const utilization = (usedFrames / 10 * 100).toFixed(1);
+            
+            document.getElementById('total-frames').textContent = 10;
+            document.getElementById('used-frames').textContent = usedFrames;
+            document.getElementById('free-frames').textContent = freeFrames;
+            document.getElementById('utilization').textContent = `${utilization}%`;
+        }
+
+        // Render process table
+        function renderProcessTable() {
+            const container = document.getElementById('process-table-body');
+            container.innerHTML = '';
+            
+            processes.forEach(process => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${process.id}</td>
+                    <td>${process.name}</td>
+                    <td>${process.pages}</td>
+                    <td>${process.segments}</td>
+                    <td>${process.memory} KB</td>
+                    <td><span class="status-badge ${process.status === 'Running' ? 'badge-success' : 'badge-warning'}">${process.status}</span></td>
+                    <td>
+                        <button class="btn btn-small btn-primary" onclick="viewProcessDetails(${process.id})">View</button>
+                        <button class="btn btn-small btn-danger" onclick="removeProcess(${process.id})">Remove</button>
+                    </td>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // Render page tables
+        function renderPageTables() {
+            const container = document.getElementById('page-tables-container');
+            container.innerHTML = '';
+            
+            processes.forEach(process => {
+                const table = document.createElement('div');
+                table.innerHTML = `
+                    <h4 style="color: var(--primary); margin: 1rem 0;">Process ${process.id} - ${process.name}</h4>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Page #</th>
+                                    <th>Valid</th>
+                                    <th>Frame #</th>
+                                    <th>R-bit</th>
+                                    <th>M-bit</th>
+                                    <th>Last Access</th>
+                                </tr>
+                            </thead>
+                            <tbody id="page-table-${process.id}">
+                                <!-- Page table rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                container.appendChild(table);
+                
+                const tbody = document.getElementById(`page-table-${process.id}`);
+                tbody.innerHTML = '';
+                process.pageTable.forEach(page => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${page.pageNo}</td>
+                        <td><span class="status-badge ${page.valid ? 'badge-success' : 'badge-danger'}">${page.valid ? '✓' : '✗'}</span></td>
+                        <td>${page.frameNo >= 0 ? page.frameNo : '-'}</td>
+                        <td>${page.referenceBit}</td>
+                        <td>${page.modifyBit}</td>
+                        <td>${page.lastUsed >= 0 ? page.lastUsed : 'Never'}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            });
+        }
+
+        // Render segment table
+        function renderSegmentTable() {
+            const container = document.getElementById('segment-table-body');
+            container.innerHTML = '';
+            
+            const process = processes[0]; // Show first process
+            process.segmentTable.forEach(segment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${segment.segmentNo}</td>
+                    <td>0x${segment.base.toString(16).padStart(4, '0')}</td>
+                    <td>${segment.limit} KB</td>
+                    <td><span class="status-badge ${segment.valid ? 'badge-success' : 'badge-danger'}">${segment.valid ? 'Valid' : 'Invalid'}</span></td>
+                    <td>${segment.protection}</td>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            document.getElementById('stat-hits').textContent = pageHits;
+            document.getElementById('stat-faults').textContent = pageFaults;
+            const total = pageHits + pageFaults;
+            const hitRatio = total > 0 ? (pageHits / total * 100).toFixed(1) : 0;
+            document.getElementById('stat-hitratio').textContent = `${hitRatio}%`;
+        }
+
+        // Show section
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelectorAll('.card').forEach(card => {
+                card.style.display = 'none';
+            });
+            
+            // Show selected section
+            document.getElementById(`${section}-section`).style.display = 'block';
+            event.target.closest('.menu-item').classList.add('active');
+            
+            logEvent(`Switched to ${section} view`, 'info');
+        }
+
+        // Use custom offset for address translation - FUNCTION ADDED BACK
+        function useCustomOffset() {
+            const offsetInput = document.getElementById('custom-offset');
+            const offset = parseInt(offsetInput.value);
+            
+            if (isNaN(offset) || offset < 0 || offset >= PAGE_SIZE_BYTES) {
+                alert(`Please enter a valid offset between 0 and ${PAGE_SIZE_BYTES - 1}`);
+                return;
+            }
+            
+            simulateAddressTranslation(offset);
+        }
+
+        // Simulate address translation - UPDATED TO SUPPORT CUSTOM OFFSET
+        function simulateAddressTranslation(customOffset = null) {
+            const process = processes[0];
+            const pageNo = Math.floor(Math.random() * process.pages);
+            const offset = customOffset !== null ? customOffset : Math.floor(Math.random() * PAGE_SIZE_BYTES);
+            const logicalAddress = (pageNo * PAGE_SIZE_BYTES) + offset;
+            
+            const page = process.pageTable[pageNo];
+            const resultDiv = document.getElementById('translation-result');
+            
+            // Update display
+            document.getElementById('logical-address').textContent = `0x${logicalAddress.toString(16).padStart(4, '0')}`;
+            document.getElementById('logical-page').textContent = pageNo;
+            document.getElementById('logical-offset').textContent = offset;
+            
+            if (page.valid) {
+                const frameNo = page.frameNo;
+                const physicalAddress = (frameNo * PAGE_SIZE_BYTES) + offset;
+                
+                document.getElementById('physical-address').textContent = `0x${physicalAddress.toString(16).padStart(4, '0')}`;
+                document.getElementById('physical-frame').textContent = frameNo;
+                document.getElementById('physical-offset').textContent = offset;
+                
+                resultDiv.className = 'alert alert-success';
+                resultDiv.innerHTML = `
+                    ✓ Translation successful!<br>
+                    Logical Address: 0x${logicalAddress.toString(16)}<br>
+                    Page Number: ${pageNo} (from logical address / ${PAGE_SIZE_BYTES})<br>
+                    Offset: ${offset} (from logical address % ${PAGE_SIZE_BYTES})<br>
+                    Frame Number: ${frameNo} (from page table)<br>
+                    Physical Address: Frame ${frameNo} × ${PAGE_SIZE_BYTES} + ${offset} = 0x${physicalAddress.toString(16)}
+                `;
+                resultDiv.style.display = 'block';
+                
+                logEvent(`Address translation: 0x${logicalAddress.toString(16)} → 0x${physicalAddress.toString(16)}`, 'info');
+            } else {
+                document.getElementById('physical-address').textContent = '0x0000';
+                document.getElementById('physical-frame').textContent = '-';
+                document.getElementById('physical-offset').textContent = '-';
+                
+                resultDiv.className = 'alert alert-danger';
+                resultDiv.innerHTML = `
+                    ✗ Page Fault!<br>
+                    Page ${pageNo} is not in memory (valid bit = 0 in page table)<br>
+                    The OS needs to load this page from disk into a free frame
+                `;
+                resultDiv.style.display = 'block';
+                
+                logEvent(`Page fault for page ${pageNo}`, 'warning');
+            }
+        }
+
+        // Use custom offset for segmentation - FUNCTION ADDED BACK
+        function useSegmentOffset() {
+            const offsetInput = document.getElementById('segment-offset');
+            const offset = parseInt(offsetInput.value);
+            
+            if (isNaN(offset) || offset < 0) {
+                alert('Please enter a valid non-negative offset');
+                return;
+            }
+            
+            simulateSegmentation(offset);
+        }
+
+        // Simulate segmentation - UPDATED TO SUPPORT CUSTOM OFFSET
+        function simulateSegmentation(customOffset = null) {
+            const process = processes[0];
+            const segmentNo = Math.floor(Math.random() * process.segments);
+            const segment = process.segmentTable[segmentNo];
+            const offset = customOffset !== null ? customOffset : Math.floor(Math.random() * (segment.limit * 1024 * 2)); // May exceed limit
+            
+            const resultDiv = document.getElementById('segmentation-result');
+            
+            if (offset < segment.limit * 1024) {
+                const physicalAddress = segment.base * 1024 + offset;
+                resultDiv.className = 'alert alert-success';
+                resultDiv.innerHTML = `
+                    ✓ Valid access!<br>
+                    Segment: ${segmentNo}<br>
+                    Base Address: ${segment.base} KB<br>
+                    Limit: ${segment.limit} KB (${segment.limit * 1024} bytes)<br>
+                    Offset: ${offset} bytes<br>
+                    Physical Address: ${segment.base} KB × 1024 + ${offset} = ${physicalAddress}<br>
+                    Protection: ${segment.protection} (${getProtectionMeaning(segment.protection)})
+                `;
+                resultDiv.style.display = 'block';
+                
+                logEvent(`Segment access: Segment ${segmentNo}, Offset ${offset} (valid)`, 'info');
+            } else {
+                resultDiv.className = 'alert alert-danger';
+                resultDiv.innerHTML = `
+                    ✗ Segmentation Fault!<br>
+                    <strong>Why this happened:</strong><br>
+                    1. Segment ${segmentNo} has limit of ${segment.limit} KB (${segment.limit * 1024} bytes)<br>
+                    2. Attempted offset: ${offset} bytes<br>
+                    3. ${offset} > ${segment.limit * 1024} → <strong>OUT OF BOUNDS!</strong><br>
+                    4. This violates memory protection → Program will be terminated
+                `;
+                resultDiv.style.display = 'block';
+                
+                logEvent(`Segmentation fault: Segment ${segmentNo}, Offset ${offset} exceeds limit ${segment.limit * 1024}`, 'error');
+            }
+        }
+
+        // Get protection meaning - FUNCTION ADDED BACK
+        function getProtectionMeaning(prot) {
+            const meanings = {
+                'R': 'Read Only',
+                'W': 'Write Only',
+                'X': 'Execute Only',
+                'RW': 'Read/Write',
+                'RX': 'Read/Execute',
+                'WX': 'Write/Execute',
+                'RWX': 'Read/Write/Execute'
+            };
+            return meanings[prot] || prot;
+        }
+
+        // Start page replacement simulation
+        function startSimulation(algorithm) {
+            if (isSimulating) {
+                return;
+            }
+            
+            // Get number of frames from user input
+            const framesInput = document.getElementById('frames-input');
+            let numFrames = parseInt(framesInput.value);
+            
+            if (isNaN(numFrames) || numFrames < 1 || numFrames > 20) {
+                alert('Please enter a valid number of frames between 1 and 20');
+                return;
+            }
+            
+            currentAlgorithm = algorithm;
+            referenceString = document.getElementById('ref-string').value
+                .split(' ')
+                .map(x => parseInt(x.trim()))
+                .filter(x => !isNaN(x));
+            
+            if (referenceString.length === 0) {
+                alert('Please enter a valid reference string');
+                return;
+            }
+            
+            isSimulating = true;
+            simulationIndex = 0;
+            pageHits = 0;
+            pageFaults = 0;
+            frameSequence = [];
+            replacementTable = [];
+            clockPointer = 0;
+            
+            // Initialize simulation memory with user-defined number of frames
+            simulationMemory = [];
+            for (let i = 0; i < numFrames; i++) {
+                simulationMemory.push({
+                    id: i,
+                    occupied: false,
+                    pageNo: -1,
+                    processId: -1,
+                    referenceBit: 0,
+                    modifyBit: 0,
+                    lastAccess: -1
+                });
+            }
+            
+            // Initialize replacement table
+            initReplacementTable(numFrames);
+            
+            // Show UI elements
+            document.getElementById('current-step').style.display = 'flex';
+            document.getElementById('replacement-table-container').style.display = 'block';
+            document.getElementById('simulation-frames').style.display = 'grid';
+            document.getElementById('algorithm-summary').style.display = 'block';
+            document.getElementById('stop-btn').style.display = 'inline-block';
+            
+            // Update algorithm name and frames count
+            document.getElementById('summary-algorithm').textContent = algorithm;
+            document.getElementById('summary-frames').textContent = numFrames;
+            
+            // Render simulation frames
+            renderSimulationFrames();
+            
+            updateStatistics();
+            
+            // Update button text
+            document.querySelectorAll('#replacement-section .btn').forEach(btn => {
+                if (btn.textContent.includes('FIFO') || btn.textContent.includes('LRU') || 
+                    btn.textContent.includes('Optimal') || btn.textContent.includes('Clock')) {
+                    btn.disabled = true;
+                }
+            });
+            
+            logEvent(`Starting ${algorithm} simulation with ${numFrames} frames and reference string: ${referenceString.join(' ')}`, 'info');
+            
+            // Start simulation loop
+            const speed = document.getElementById('speed-slider').value;
+            simulationInterval = setInterval(simulationStep, 1000 - speed + 100);
+        }
+
+        // Initialize replacement table
+        function initReplacementTable(numFrames) {
+            const header = document.getElementById('replacement-table-header');
+            const body = document.getElementById('replacement-table-body');
+            
+            // Clear existing content
+            header.innerHTML = '';
+            body.innerHTML = '';
+            
+            // Create header
+            header.innerHTML = '<th>Step</th><th>Page</th>';
+            for (let i = 0; i < numFrames; i++) {
+                header.innerHTML += `<th>Frame ${i}</th>`;
+            }
+            header.innerHTML += '<th>Hit/Miss</th><th>Replaced</th>';
+            
+            // Initialize empty rows
+            for (let i = 0; i < referenceString.length; i++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${i + 1}</td>
+                    <td>${referenceString[i]}</td>
+                    ${Array(numFrames).fill('<td>-</td>').join('')}
+                    <td>-</td>
+                    <td>-</td>
+                `;
+                body.appendChild(row);
+            }
+        }
+
+        // Render simulation frames
+        function renderSimulationFrames() {
+            const container = document.getElementById('simulation-frames');
+            container.innerHTML = '';
+            
+            simulationMemory.forEach(frame => {
+                const frameDiv = document.createElement('div');
+                frameDiv.className = `frame ${frame.occupied ? 'used' : 'free'}`;
+                frameDiv.id = `sim-frame-${frame.id}`;
+                frameDiv.innerHTML = `
+                    <div class="frame-header">Frame ${frame.id}</div>
+                    <div class="frame-content">
+                        ${frame.occupied ? 
+                            `Page: ${frame.pageNo}<br>
+                             R-bit: ${frame.referenceBit}<br>
+                             M-bit: ${frame.modifyBit}` 
+                            : 'FREE'}
+                    </div>
+                    ${frame.occupied ? '<div class="status-badge badge-danger">Used</div>' : 
+                                       '<div class="status-badge badge-success">Free</div>'}
+                `;
+                container.appendChild(frameDiv);
+            });
+        }
+
+        // Simulation step
+        function simulationStep() {
+            if (simulationIndex >= referenceString.length) {
+                stopSimulation();
+                showFinalResults();
+                return;
+            }
+            
+            const pageNo = referenceString[simulationIndex];
+            const time = simulationIndex + 1;
+            
+            // Update current step display
+            document.getElementById('step-number').textContent = time;
+            document.getElementById('step-page').textContent = pageNo;
+            
+            // Check if page is in memory
+            let frameNo = -1;
+            let pageFound = false;
+            let replacedPage = -1;
+            
+            for (let i = 0; i < simulationMemory.length; i++) {
+                if (simulationMemory[i].occupied && simulationMemory[i].pageNo === pageNo) {
+                    frameNo = i;
+                    pageFound = true;
+                    break;
+                }
+            }
+            
+            if (pageFound) {
+                // Page hit
+                pageHits++;
+                simulationMemory[frameNo].lastAccess = time;
+                simulationMemory[frameNo].referenceBit = 1;
+                
+                document.getElementById('step-result-type').className = 'step-result step-hit';
+                document.getElementById('step-result-type').textContent = 'HIT';
+                
+                logEvent(`Time ${time}: Page ${pageNo} HIT in frame ${frameNo}`, 'info');
+            } else {
+                // Page fault
+                pageFaults++;
+                
+                // Find frame to replace
+                if (frameSequence.length < simulationMemory.length) {
+                    // There's still free frames
+                    frameNo = frameSequence.length;
+                    frameSequence.push(frameNo);
+                } else {
+                    // Need to replace using algorithm
+                    switch (currentAlgorithm) {
+                        case 'FIFO':
+                            frameNo = frameSequence[0];
+                            replacedPage = simulationMemory[frameNo].pageNo;
+                            frameSequence.shift();
+                            frameSequence.push(frameNo);
+                            break;
+                        case 'LRU':
+                            frameNo = findLRUFrame();
+                            replacedPage = simulationMemory[frameNo].pageNo;
+                            break;
+                        case 'OPTIMAL':
+                            frameNo = findOptimalFrame();
+                            replacedPage = simulationMemory[frameNo].pageNo;
+                            break;
+                        case 'CLOCK':
+                            frameNo = findClockFrame();
+                            replacedPage = simulationMemory[frameNo].pageNo;
+                            break;
+                    }
+                }
+                
+                // Update memory
+                simulationMemory[frameNo].occupied = true;
+                simulationMemory[frameNo].pageNo = pageNo;
+                simulationMemory[frameNo].lastAccess = time;
+                simulationMemory[frameNo].referenceBit = 1;
+                simulationMemory[frameNo].modifyBit = Math.random() > 0.5 ? 1 : 0;
+                simulationMemory[frameNo].processId = 1; // Assign to process 1
+                
+                document.getElementById('step-result-type').className = 'step-result step-miss';
+                document.getElementById('step-result-type').textContent = 'MISS';
+                
+                logEvent(`Time ${time}: Page ${pageNo} FAULT, loaded into frame ${frameNo} ${replacedPage >= 0 ? '(replaced page ' + replacedPage + ')' : ''}`, 'warning');
+            }
+            
+            // Update replacement table
+            updateReplacementTable(simulationIndex, frameNo, pageFound, replacedPage);
+            
+            // Update statistics and frames display
+            updateStatistics();
+            updateSummary();
+            renderSimulationFrames();
+            
+            // Highlight current frame
+            highlightSimulationFrame(frameNo, pageFound);
+            
+            simulationIndex++;
+            
+            // If simulation is complete
+            if (simulationIndex >= referenceString.length) {
+                stopSimulation();
+                showFinalResults();
+            }
+        }
+
+        // Update replacement table
+        function updateReplacementTable(stepIndex, frameNo, isHit, replacedPage) {
+            const rows = document.getElementById('replacement-table-body').rows;
+            const row = rows[stepIndex];
+            
+            // Update frame cells
+            for (let i = 0; i < simulationMemory.length; i++) {
+                const cell = row.cells[i + 2]; // Skip step and page columns
+                if (simulationMemory[i].occupied) {
+                    cell.textContent = simulationMemory[i].pageNo;
+                    cell.className = 'frame-cell';
+                } else {
+                    cell.textContent = '-';
+                    cell.className = '';
+                }
+            }
+            
+            // Update hit/miss cell
+            const hitMissCell = row.cells[simulationMemory.length + 2];
+            if (isHit) {
+                hitMissCell.textContent = 'HIT';
+                hitMissCell.className = 'hit-cell';
+            } else {
+                hitMissCell.textContent = 'MISS';
+                hitMissCell.className = 'miss-cell';
+            }
+            
+            // Update replaced cell
+            const replacedCell = row.cells[simulationMemory.length + 3];
+            if (replacedPage >= 0) {
+                replacedCell.textContent = `Page ${replacedPage} → Frame ${frameNo}`;
+                replacedCell.className = 'replacement-cell';
+            } else if (!isHit) {
+                replacedCell.textContent = `Loaded into Frame ${frameNo}`;
+                replacedCell.className = 'replacement-cell';
+            } else {
+                replacedCell.textContent = '-';
+                replacedCell.className = '';
+            }
+            
+            // Scroll to current row
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Find LRU frame
+        function findLRUFrame() {
+            let lruFrame = 0;
+            let minTime = Infinity;
+            
+            for (let i = 0; i < simulationMemory.length; i++) {
+                if (simulationMemory[i].occupied && simulationMemory[i].lastAccess < minTime) {
+                    minTime = simulationMemory[i].lastAccess;
+                    lruFrame = i;
+                }
+            }
+            
+            return lruFrame;
+        }
+
+        // Find optimal frame (future reference)
+        function findOptimalFrame() {
+            let optimalFrame = 0;
+            let farthestUse = -1;
+            
+            for (let i = 0; i < simulationMemory.length; i++) {
+                if (simulationMemory[i].occupied) {
+                    const page = simulationMemory[i].pageNo;
+                    let nextUse = Infinity;
+                    
+                    // Find next use of this page
+                    for (let j = simulationIndex + 1; j < referenceString.length; j++) {
+                        if (referenceString[j] === page) {
+                            nextUse = j;
+                            break;
+                        }
+                    }
+                    
+                    if (nextUse > farthestUse) {
+                        farthestUse = nextUse;
+                        optimalFrame = i;
+                    }
+                }
+            }
+            
+            return optimalFrame;
+        }
+
+        // Find frame using clock algorithm
+        function findClockFrame() {
+            // Find starting point
+            let start = clockPointer;
+            
+            while (true) {
+                if (!simulationMemory[clockPointer].occupied) {
+                    return clockPointer;
+                }
+                
+                if (simulationMemory[clockPointer].referenceBit === 0) {
+                    const selected = clockPointer;
+                    clockPointer = (clockPointer + 1) % simulationMemory.length;
+                    return selected;
+                } else {
+                    // Give second chance
+                    simulationMemory[clockPointer].referenceBit = 0;
+                }
+                
+                clockPointer = (clockPointer + 1) % simulationMemory.length;
+                
+                // Prevent infinite loop
+                if (clockPointer === start) {
+                    // All pages have reference bit = 1, reset all
+                    for (let i = 0; i < simulationMemory.length; i++) {
+                        if (simulationMemory[i].occupied) {
+                            simulationMemory[i].referenceBit = 0;
+                        }
+                    }
+                    return findClockFrame(); // Try again
+                }
+            }
+        }
+
+        // Highlight simulation frame
+        function highlightSimulationFrame(frameNo, isHit) {
+            const frames = document.querySelectorAll('#simulation-frames .frame');
+            frames.forEach(frame => {
+                frame.classList.remove('selected');
+                frame.style.backgroundColor = '';
+                frame.style.borderColor = '';
+            });
+            
+            if (frameNo >= 0 && frames[frameNo]) {
+                frames[frameNo].classList.add('selected');
+                
+                // Add visual feedback
+                const frameEl = frames[frameNo];
+                frameEl.style.backgroundColor = isHit ? '#d5f4e6' : '#fadbd8';
+                frameEl.style.borderColor = isHit ? '#27ae60' : '#e74c3c';
+            }
+        }
+
+        // Update algorithm summary
+        function updateSummary() {
+            document.getElementById('summary-hits').textContent = pageHits;
+            document.getElementById('summary-faults').textContent = pageFaults;
+            const total = pageHits + pageFaults;
+            const hitRatio = total > 0 ? (pageHits / total * 100).toFixed(1) : 0;
+            document.getElementById('summary-hitratio').textContent = `${hitRatio}%`;
+        }
+
+        // Show final results
+        function showFinalResults() {
+            const total = pageHits + pageFaults;
+            const hitRatio = total > 0 ? (pageHits / total * 100).toFixed(1) : 0;
+            const faultRatio = total > 0 ? (pageFaults / total * 100).toFixed(1) : 0;
+            
+            logEvent(`Simulation completed! Results: ${pageHits} hits, ${pageFaults} faults, Hit Ratio: ${hitRatio}%`, 'info');
+            
+            // Show final message
+            const visualizationArea = document.getElementById('algorithm-visualization');
+            visualizationArea.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <h3 style="color: var(--primary); margin-bottom: 1rem;">${currentAlgorithm} Simulation Complete!</h3>
+                    <div style="background: white; padding: 2rem; border-radius: var(--border-radius); box-shadow: var(--box-shadow);">
+                        <h4 style="color: var(--primary); margin-bottom: 1rem;">Final Results</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 2rem; font-weight: bold; color: #27ae60;">${pageHits}</div>
+                                <div style="color: #7f8c8d;">Page Hits</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 2rem; font-weight: bold; color: #e74c3c;">${pageFaults}</div>
+                                <div style="color: #7f8c8d;">Page Faults</div>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: bold; color: #3498db;">${hitRatio}%</div>
+                                <div style="color: #7f8c8d;">Hit Ratio</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: bold; color: #f39c12;">${faultRatio}%</div>
+                                <div style="color: #7f8c8d;">Fault Ratio</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: var(--border-radius);">
+                            <strong>Configuration:</strong> ${simulationMemory.length} frames | ${currentAlgorithm} algorithm
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="resetPageReplacement()" style="margin-top: 2rem;">Run Another Simulation</button>
+                </div>
+            `;
+        }
+
+        // Stop simulation
+        function stopSimulation() {
+            isSimulating = false;
+            clearInterval(simulationInterval);
+            
+            // Enable algorithm buttons
+            document.querySelectorAll('#replacement-section .btn').forEach(btn => {
+                if (btn.textContent.includes('FIFO') || btn.textContent.includes('LRU') || 
+                    btn.textContent.includes('Optimal') || btn.textContent.includes('Clock')) {
+                    btn.disabled = false;
+                }
+            });
+            
+            // Hide stop button
+            document.getElementById('stop-btn').style.display = 'none';
+            
+            logEvent('Simulation stopped', 'info');
+        }
+
+        // Generate random reference string
+        function generateReferenceString() {
+            const length = Math.floor(Math.random() * 10) + 10;
+            const refs = [];
+            for (let i = 0; i < length; i++) {
+                refs.push(Math.floor(Math.random() * MAX_PAGES));
+            }
+            document.getElementById('ref-string').value = refs.join(' ');
+            logEvent(`Generated new reference string: ${refs.join(' ')}`, 'info');
+        }
+
+        // Reset page replacement only
+        function resetPageReplacement() {
+            stopSimulation();
+            
+            // Reset UI elements
+            document.getElementById('current-step').style.display = 'none';
+            document.getElementById('replacement-table-container').style.display = 'none';
+            document.getElementById('simulation-frames').style.display = 'none';
+            document.getElementById('algorithm-summary').style.display = 'none';
+            
+            // Reset visualization area
+            const visualizationArea = document.getElementById('algorithm-visualization');
+            visualizationArea.innerHTML = `
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">Select an algorithm to start simulation</h3>
+                <p style="color: #7f8c8d; text-align: center;">
+                    Enter number of frames (1-20), then select an algorithm to start
+                </p>
+            `;
+            
+            // Reset statistics
+            pageHits = 0;
+            pageFaults = 0;
+            updateStatistics();
+            
+            logEvent('Page replacement simulation reset', 'info');
+        }
+
+        // Add random process
+        function addRandomProcess() {
+            if (processes.length >= MAX_PROCESSES) {
+                alert(`Maximum ${MAX_PROCESSES} processes allowed`);
+                return;
+            }
+            
+            const processNames = ['Browser', 'Editor', 'Terminal', 'Player', 'Compiler'];
+            const name = processNames[Math.floor(Math.random() * processNames.length)];
+            const pages = Math.floor(Math.random() * 8) + 3;
+            const segments = Math.floor(Math.random() * 4) + 2;
+            const memory = pages * PAGE_SIZE;
+            
+            const newProcess = {
+                id: ++currentProcessId,
+                name: name,
+                pages: pages,
+                segments: segments,
+                memory: memory,
+                status: 'Ready',
+                pageTable: generatePageTable(pages),
+                segmentTable: generateSegmentTable(segments)
+            };
+            
+            processes.push(newProcess);
+            renderProcessTable();
+            renderPageTables();
+            
+            logEvent(`Added new process: ${name} (PID: ${newProcess.id})`, 'info');
+        }
+
+        // Show add process modal
+        function showAddProcessModal() {
+            document.getElementById('add-process-modal').style.display = 'flex';
+        }
+
+        // Close add process modal
+        function closeAddProcessModal() {
+            document.getElementById('add-process-modal').style.display = 'none';
+        }
+
+        // Add process from form
+        document.getElementById('process-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (processes.length >= MAX_PROCESSES) {
+                alert(`Maximum ${MAX_PROCESSES} processes allowed`);
+                return;
+            }
+            
+            const name = document.getElementById('process-name').value;
+            const pages = parseInt(document.getElementById('num-pages').value);
+            const segments = parseInt(document.getElementById('num-segments').value);
+            const memory = parseInt(document.getElementById('memory-required').value);
+            
+            const newProcess = {
+                id: ++currentProcessId,
+                name: name,
+                pages: pages,
+                segments: segments,
+                memory: memory,
+                status: 'Ready',
+                pageTable: generatePageTable(pages),
+                segmentTable: generateSegmentTable(segments)
+            };
+            
+            processes.push(newProcess);
+            renderProcessTable();
+            renderPageTables();
+            closeAddProcessModal();
+            
+            logEvent(`Added new process: ${name} (PID: ${newProcess.id})`, 'info');
+            
+            // Reset form
+            this.reset();
+        });
+
+        // Remove process
+        function removeProcess(pid) {
+            if (pid === 1) {
+                alert('Cannot remove system process');
+                return;
+            }
+            
+            const index = processes.findIndex(p => p.id === pid);
+            if (index > -1) {
+                const process = processes[index];
+                
+                // Free memory occupied by this process
+                process.pageTable.forEach(page => {
+                    if (page.valid && page.frameNo >= 0) {
+                        memory[page.frameNo].occupied = false;
+                    }
+                });
+                
+                processes.splice(index, 1);
+                renderProcessTable();
+                renderPageTables();
+                renderMemoryFrames();
+                
+                logEvent(`Removed process: PID ${pid}`, 'info');
+            }
+        }
+
+        // View process details
+        function viewProcessDetails(pid) {
+            const process = processes.find(p => p.id === pid);
+            if (process) {
+                alert(`Process Details:\nID: ${process.id}\nName: ${process.name}\nPages: ${process.pages}\nSegments: ${process.segments}\nMemory: ${process.memory} KB\nStatus: ${process.status}`);
+            }
+        }
+
+        // Compact memory
+        function compactMemory() {
+            // Simple compaction: move all occupied frames to the beginning
+            let freeIndex = 0;
+            for (let i = 0; i < memory.length; i++) {
+                if (memory[i].occupied) {
+                    if (i !== freeIndex) {
+                        // Move frame
+                        memory[freeIndex] = {...memory[i]};
+                        memory[i].occupied = false;
+                        memory[i].pageNo = -1;
+                        
+                        // Update page tables
+                        processes.forEach(process => {
+                            process.pageTable.forEach(page => {
+                                if (page.frameNo === i) {
+                                    page.frameNo = freeIndex;
+                                }
+                            });
+                        });
+                    }
+                    freeIndex++;
+                }
+            }
+            
+            // Fill remaining frames as free
+            for (let i = freeIndex; i < memory.length; i++) {
+                memory[i] = {
+                    id: i,
+                    occupied: false,
+                    pageNo: -1,
+                    processId: -1,
+                    referenceBit: 0,
+                    modifyBit: 0,
+                    lastAccess: -1
+                };
+            }
+            
+            renderMemoryFrames();
+            renderPageTables();
+            
+            logEvent('Memory compaction completed', 'info');
+        }
+
+        // Refresh memory
+        function refreshMemory() {
+            renderMemoryFrames();
+            logEvent('Memory display refreshed', 'info');
+        }
+
+        // Reset entire system
+        function resetSimulation() {
+            stopSimulation();
+            initSystem();
+            logEvent('System reset to initial state', 'info');
+        }
+
+        // Log events
+        function logEvent(message, type) {
+            const logContainer = document.getElementById('simulation-log');
+            if (!logContainer) return;
+            
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `
+                <span class="log-time">[${new Date().toLocaleTimeString()}]</span>
+                <span class="log-type ${type}">${type.toUpperCase()}</span>: ${message}
+            `;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // Initialize on load
+        function initializeTLB() {
+            const tlbSize = parseInt(document.getElementById('tlb-size').value);
+            tlbEntries = [];
+            for (let i = 0; i < tlbSize; i++) {
+                tlbEntries.push({
+                    entry: i,
+                    virtualPage: -1,
+                    physicalFrame: -1,
+                    valid: false,
+                    lastUsed: -1
+                });
+            }
+            renderTLBTable();
+        }
+
+        function renderTLBTable() {
+            const tbody = document.getElementById('tlb-table-body');
+            tbody.innerHTML = '';
+            
+            tlbEntries.forEach(entry => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${entry.entry}</td>
+                    <td>${entry.valid ? entry.virtualPage : '-'}</td>
+                    <td>${entry.valid ? entry.physicalFrame : '-'}</td>
+                    <td><span class="status-badge ${entry.valid ? 'badge-success' : 'badge-danger'}">${entry.valid ? 'Valid' : 'Invalid'}</span></td>
+                    <td>${entry.lastUsed >= 0 ? entry.lastUsed : '-'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function generateTLBRefString() {
+            const length = Math.floor(Math.random() * 10) + 15;
+            const refs = [];
+            for (let i = 0; i < length; i++) {
+                refs.push(Math.floor(Math.random() * 15));
+            }
+            document.getElementById('tlb-ref-string').value = refs.join(' ');
+        }
+
+        function runTLBSimulation() {
+            const tlbSizeInput = parseInt(document.getElementById('tlb-size').value);
+            const tlbHitTimeInput = parseInt(document.getElementById('tlb-hit-time').value);
+            const tlbMissTimeInput = parseInt(document.getElementById('tlb-miss-time').value);
+            const refStringInput = document.getElementById('tlb-ref-string').value
+                .split(' ')
+                .map(x => parseInt(x.trim()))
+                .filter(x => !isNaN(x));
+
+            if (refStringInput.length === 0) {
+                alert('Please enter a valid reference string');
+                return;
+            }
+
+            if (tlbSizeInput < 2) {
+                alert('TLB size must be at least 2');
+                return;
+            }
+
+            // Initialize TLB
+            initializeTLB();
+            tlbHits = 0;
+            tlbMisses = 0;
+            tlbSimulationData = [];
+
+            // Clear results
+            document.getElementById('tlb-results-table').innerHTML = '';
+
+            // Generate page-to-frame mapping for consistency
+            const pageToFrame = {};
+            for (let i = 0; i < refStringInput.length; i++) {
+                const page = refStringInput[i];
+                if (!(page in pageToFrame)) {
+                    pageToFrame[page] = Math.floor(Math.random() * 32);
+                }
+            }
+
+            // Simulate TLB accesses
+            let tlbIndex = 0;
+            refStringInput.forEach((page, step) => {
+                const frame = pageToFrame[page];
+                let isHit = false;
+                let accessTime = tlbMissTimeInput;
+
+                // Check if page is in TLB
+                const tlbEntry = tlbEntries.find(e => e.valid && e.virtualPage === page);
+                
+                if (tlbEntry) {
+                    // TLB HIT
+                    isHit = true;
+                    tlbHits++;
+                    accessTime = tlbHitTimeInput;
+                    tlbEntry.lastUsed = step;
+                } else {
+                    // TLB MISS
+                    tlbMisses++;
+                    accessTime = tlbMissTimeInput;
+
+                    // Update TLB with LRU replacement
+                    let entryToReplace = 0;
+                    let minLastUsed = Infinity;
+
+                    for (let i = 0; i < tlbEntries.length; i++) {
+                        if (!tlbEntries[i].valid) {
+                            entryToReplace = i;
+                            break;
+                        }
+                        if (tlbEntries[i].lastUsed < minLastUsed) {
+                            minLastUsed = tlbEntries[i].lastUsed;
+                            entryToReplace = i;
+                        }
+                    }
+
+                    tlbEntries[entryToReplace].virtualPage = page;
+                    tlbEntries[entryToReplace].physicalFrame = frame;
+                    tlbEntries[entryToReplace].valid = true;
+                    tlbEntries[entryToReplace].lastUsed = step;
+                }
+
+                // Store simulation data
+                tlbSimulationData.push({
+                    step: step + 1,
+                    page: page,
+                    frame: frame,
+                    hit: isHit,
+                    time: accessTime
+                });
+
+                // Add row to results table
+                const tbody = document.getElementById('tlb-results-table');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${step + 1}</td>
+                    <td>Page ${page}</td>
+                    <td><span class="status-badge ${isHit ? 'tlb-hit' : 'tlb-miss'}">${isHit ? 'HIT' : 'MISS'}</span></td>
+                    <td>Frame ${frame}</td>
+                    <td><strong>${accessTime} ns</strong></td>
+                    <td>${isHit ? 'Found in TLB' : 'Loaded from Page Table'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update TLB table
+            renderTLBTable();
+
+            // Calculate statistics
+            updateTLBStatistics(tlbHitTimeInput, tlbMissTimeInput);
+        }
+
+        function updateTLBStatistics(hitTime, missTime) {
+            const total = tlbHits + tlbMisses;
+            const hitRatio = total > 0 ? (tlbHits / total * 100).toFixed(1) : 0;
+
+            // Update hit/miss counts
+            document.getElementById('tlb-hits-count').textContent = tlbHits;
+            document.getElementById('tlb-misses-count').textContent = tlbMisses;
+            document.getElementById('tlb-hit-ratio').textContent = `${hitRatio}%`;
+
+            // Calculate average access time with TLB
+            const totalTimeWithTLB = (tlbHits * hitTime) + (tlbMisses * missTime);
+            const avgTimeWithTLB = total > 0 ? (totalTimeWithTLB / total).toFixed(1) : 0;
+            document.getElementById('tlb-avg-time').textContent = `${avgTimeWithTLB} ns`;
+
+            // Calculate total access time without TLB (all page table lookups)
+            const totalTimeWithoutTLB = total * missTime;
+
+            // Update comparison section
+            document.getElementById('tlb-total-with').textContent = `${totalTimeWithTLB} ns`;
+            document.getElementById('tlb-total-without').textContent = `${totalTimeWithoutTLB} ns`;
+            
+            document.getElementById('tlb-with-hits').textContent = tlbHits;
+            document.getElementById('tlb-with-hit-time').textContent = hitTime;
+            document.getElementById('tlb-with-misses').textContent = tlbMisses;
+            document.getElementById('tlb-with-miss-time').textContent = missTime;
+            
+            document.getElementById('tlb-all-accesses').textContent = total;
+            document.getElementById('tlb-without-time').textContent = missTime;
+
+            // Calculate time saved and speedup
+            const timeSaved = totalTimeWithoutTLB - totalTimeWithTLB;
+            const speedup = totalTimeWithoutTLB > 0 ? (totalTimeWithoutTLB / (totalTimeWithTLB > 0 ? totalTimeWithTLB : 1)).toFixed(2) : 1;
+
+            document.getElementById('tlb-time-saved').textContent = `${timeSaved} ns`;
+            document.getElementById('tlb-speedup').textContent = speedup;
+
+            // Update current step info
+            document.getElementById('tlb-step-info').innerHTML = `
+                TLB Hits: <strong>${tlbHits}</strong> | 
+                TLB Misses: <strong>${tlbMisses}</strong> | 
+                Hit Ratio: <strong>${hitRatio}%</strong> | 
+                Avg Access Time: <strong>${avgTimeWithTLB} ns</strong>
+            `;
+
+            logEvent(`TLB Simulation completed! Hits: ${tlbHits}, Misses: ${tlbMisses}, Hit Ratio: ${hitRatio}%`, 'info');
+        }
+
+        function resetTLB() {
+            tlbHits = 0;
+            tlbMisses = 0;
+            tlbSimulationData = [];
+            initializeTLB();
+            
+            // Clear results table
+            document.getElementById('tlb-results-table').innerHTML = '';
+            
+            // Reset statistics display
+            document.getElementById('tlb-hits-count').textContent = '0';
+            document.getElementById('tlb-misses-count').textContent = '0';
+            document.getElementById('tlb-hit-ratio').textContent = '0%';
+            document.getElementById('tlb-avg-time').textContent = '0 ns';
+            document.getElementById('tlb-step-info').textContent = '-';
+            
+            // Reset comparison
+            document.getElementById('tlb-total-with').textContent = '0 ns';
+            document.getElementById('tlb-total-without').textContent = '0 ns';
+            document.getElementById('tlb-time-saved').textContent = '0 ns';
+            document.getElementById('tlb-speedup').textContent = '1.00';
+
+            logEvent('TLB reset', 'info');
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initSystem);
+    </script>
+</body>
+</html>
