@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -402,7 +403,8 @@
             font-weight: 600;
         }
 
-        input, select {
+        input,
+        select {
             width: 100%;
             padding: 0.8rem;
             border: 2px solid var(--light);
@@ -411,7 +413,8 @@
             transition: border-color 0.3s ease;
         }
 
-        input:focus, select:focus {
+        input:focus,
+        select:focus {
             outline: none;
             border-color: var(--secondary);
         }
@@ -644,26 +647,63 @@
             .header h1 {
                 font-size: 2rem;
             }
-            
+
             .memory-grid {
                 grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             }
-            
+
             .address-translation {
                 grid-template-columns: 1fr;
                 gap: 1rem;
             }
-            
+
             .arrow {
                 transform: rotate(90deg);
             }
-            
+
             .summary-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
+        .stats-comparison-table {
+            width: 100%;
+            margin-top: 1rem;
+            border-collapse: collapse;
+        }
+
+        .stats-comparison-table th,
+        .stats-comparison-table td {
+            padding: 0.8rem;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .stats-comparison-table th {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .stats-best {
+            background-color: #d5f4e6;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .stats-worst {
+            background-color: #fadbd8;
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .stats-intermediate {
+            background-color: #fef9e7;
+            color: #f39c12;
+            font-weight: bold;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -680,7 +720,8 @@
                 </div>
                 <div class="menu-item" onclick="showSection('paging')">
                     <strong>Paging System</strong>
-                    <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">Page tables & address translation</p>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">Page tables & address translation
+                    </p>
                 </div>
                 <div class="menu-item" onclick="showSection('segmentation')">
                     <strong>Segmentation</strong>
@@ -703,8 +744,10 @@
                     <h3 style="color: var(--primary); margin-bottom: 1rem;">Quick Actions</h3>
                     <div class="btn-group">
                         <button class="btn btn-success btn-small" onclick="resetSimulation()">Reset</button>
-                        <button class="btn btn-primary btn-small" onclick="generateReferenceString()">Generate Ref String</button>
-                        <button class="btn btn-warning btn-small" onclick="addRandomProcess()">Add Random Process</button>
+                        <button class="btn btn-primary btn-small" onclick="generateReferenceString()">Generate Ref
+                            String</button>
+                        <button class="btn btn-warning btn-small" onclick="addRandomProcess()">Add Random
+                            Process</button>
                     </div>
                 </div>
 
@@ -764,14 +807,17 @@
                 <div class="card" id="paging-section" style="display: none;">
                     <div class="card-header">
                         <h2 class="card-title">Paging System</h2>
-                        <button class="btn btn-primary" onclick="simulateAddressTranslation()">Simulate Translation</button>
+                        <button class="btn btn-primary" onclick="simulateAddressTranslation()">Simulate
+                            Translation</button>
                     </div>
                     <div class="visualization-area">
-                        <h3 style="color: var(--primary); margin-bottom: 2rem;">Logical to Physical Address Translation</h3>
+                        <h3 style="color: var(--primary); margin-bottom: 2rem;">Logical to Physical Address Translation
+                        </h3>
                         <div class="address-translation">
                             <div class="address-part">
                                 <h4>Logical Address</h4>
-                                <div style="font-size: 1.5rem; margin: 1rem 0; font-family: monospace;" id="logical-address">0x0000</div>
+                                <div style="font-size: 1.5rem; margin: 1rem 0; font-family: monospace;"
+                                    id="logical-address">0x0000</div>
                                 <div style="font-size: 0.9rem; color: #7f8c8d;">
                                     Page: <span id="logical-page">0</span> | Offset: <span id="logical-offset">0</span>
                                 </div>
@@ -779,9 +825,11 @@
                             <div class="arrow">→</div>
                             <div class="address-part">
                                 <h4>Physical Address</h4>
-                                <div style="font-size: 1.5rem; margin: 1rem 0; font-family: monospace;" id="physical-address">0x0000</div>
+                                <div style="font-size: 1.5rem; margin: 1rem 0; font-family: monospace;"
+                                    id="physical-address">0x0000</div>
                                 <div style="font-size: 0.9rem; color: #7f8c8d;">
-                                    Frame: <span id="physical-frame">0</span> | Offset: <span id="physical-offset">0</span>
+                                    Frame: <span id="physical-frame">0</span> | Offset: <span
+                                        id="physical-offset">0</span>
                                 </div>
                             </div>
                         </div>
@@ -790,11 +838,12 @@
                             <div class="form-group">
                                 <label for="custom-offset">Enter Custom Offset (0-4095):</label>
                                 <div style="display: flex; gap: 0.5rem;">
-                                    <input type="number" id="custom-offset" min="0" max="4095" value="0" style="flex: 1;">
+                                    <input type="number" id="custom-offset" min="0" max="4095" value="0"
+                                        style="flex: 1;">
                                     <button class="btn btn-small" onclick="useCustomOffset()">Use Offset</button>
                                 </div>
                                 <p style="color: #7f8c8d; font-size: 0.85rem; margin-top: 0.5rem;">
-                                    <strong>Offset Explanation:</strong> The offset is the displacement within a page. 
+                                    <strong>Offset Explanation:</strong> The offset is the displacement within a page.
                                     Since page size is 4KB (4096 bytes), offset can range from 0 to 4095.
                                 </p>
                             </div>
@@ -842,7 +891,10 @@
                                     <button class="btn btn-small" onclick="useSegmentOffset()">Check Access</button>
                                 </div>
                                 <p style="color: #7f8c8d; font-size: 0.85rem; margin-top: 0.5rem;">
-                                    <strong>What is a Segmentation Fault?</strong> A segmentation fault occurs when a program tries to access memory outside the bounds of a segment (offset exceeds segment limit) or tries to access a segment with invalid permissions (e.g., writing to a read-only segment).
+                                    <strong>What is a Segmentation Fault?</strong> A segmentation fault occurs when a
+                                    program tries to access memory outside the bounds of a segment (offset exceeds
+                                    segment limit) or tries to access a segment with invalid permissions (e.g., writing
+                                    to a read-only segment).
                                 </p>
                             </div>
                         </div>
@@ -859,10 +911,11 @@
                             <button class="btn btn-success" onclick="startSimulation('LRU')">LRU</button>
                             <button class="btn btn-warning" onclick="startSimulation('OPTIMAL')">Optimal</button>
                             <button class="btn btn-danger" onclick="startSimulation('CLOCK')">Clock</button>
-                            <button class="btn btn-small" onclick="stopSimulation()" id="stop-btn" style="display: none;">Stop</button>
+                            <button class="btn btn-small" onclick="stopSimulation()" id="stop-btn"
+                                style="display: none;">Stop</button>
                         </div>
                     </div>
-                    
+
                     <div class="simulation-controls">
                         <div style="display: flex; gap: 1rem; align-items: center;">
                             <div class="input-group">
@@ -871,13 +924,15 @@
                             </div>
                             <div class="input-group">
                                 <label for="speed-slider">Speed:</label>
-                                <input type="range" min="100" max="2000" value="1000" class="slider" id="speed-slider" style="width: 150px;">
+                                <input type="range" min="100" max="2000" value="1000" class="slider" id="speed-slider"
+                                    style="width: 150px;">
                             </div>
                         </div>
                         <div>
                             <label>Reference String:</label>
                             <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-                                <input type="text" id="ref-string" value="7 0 1 2 0 3 0 4 2 3 0 3 2 1 2" style="flex: 1;">
+                                <input type="text" id="ref-string" value="7 0 1 2 0 3 0 4 2 3 0 3 2 1 2"
+                                    style="flex: 1;">
                                 <button class="btn btn-small" onclick="generateReferenceString()">Generate</button>
                             </div>
                         </div>
@@ -885,18 +940,20 @@
 
                     <div class="visualization-area">
                         <div id="algorithm-visualization">
-                            <h3 style="color: var(--primary); margin-bottom: 1rem;">Select an algorithm to start simulation</h3>
+                            <h3 style="color: var(--primary); margin-bottom: 1rem;">Select an algorithm to start
+                                simulation</h3>
                             <p style="color: #7f8c8d; text-align: center;">
                                 Enter number of frames (1-20), then select an algorithm to start
                             </p>
                         </div>
-                        
+
                         <!-- Current Step Information -->
                         <div id="current-step" class="step-info" style="display: none;">
-                            <div class="step-title">Step <span id="step-number">0</span>: Page <span id="step-page">-</span></div>
+                            <div class="step-title">Step <span id="step-number">0</span>: Page <span
+                                    id="step-page">-</span></div>
                             <div class="step-result" id="step-result-type">-</div>
                         </div>
-                        
+
                         <!-- Page Replacement Table -->
                         <div id="replacement-table-container" style="width: 100%; display: none;">
                             <h4 style="color: var(--primary); margin-bottom: 1rem;">Page Replacement Table</h4>
@@ -913,12 +970,12 @@
                                 </table>
                             </div>
                         </div>
-                        
+
                         <!-- Memory Frames Visualization -->
                         <div id="simulation-frames" class="memory-grid" style="display: none; margin-top: 1rem;">
                             <!-- Frames will be generated here during simulation -->
                         </div>
-                        
+
                         <!-- Algorithm Summary -->
                         <div id="algorithm-summary" class="algorithm-summary" style="display: none;">
                             <h4 style="color: var(--primary); margin-bottom: 1rem;">Algorithm Summary</h4>
@@ -986,7 +1043,8 @@
 
                     <div style="margin-bottom: 1.5rem;">
                         <h3 style="color: var(--primary); margin-bottom: 1rem;">TLB Configuration</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                             <div class="form-group">
                                 <label for="tlb-size">TLB Entries:</label>
                                 <input type="number" id="tlb-size" min="2" max="32" value="8">
@@ -1002,7 +1060,8 @@
                             <div class="form-group">
                                 <label for="tlb-ref-string">Page Reference String:</label>
                                 <div style="display: flex; gap: 0.5rem;">
-                                    <input type="text" id="tlb-ref-string" value="1 2 3 4 1 2 5 6 2 3 7 1 2 3 4" style="flex: 1;">
+                                    <input type="text" id="tlb-ref-string" value="1 2 3 4 1 2 5 6 2 3 7 1 2 3 4"
+                                        style="flex: 1;">
                                     <button class="btn btn-small" onclick="generateTLBRefString()">Generate</button>
                                 </div>
                             </div>
@@ -1010,7 +1069,8 @@
                     </div>
 
                     <!-- TLB Visualization -->
-                    <div style="background: var(--light); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <div
+                        style="background: var(--light); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1.5rem;">
                         <h3 style="color: var(--primary); margin-bottom: 1rem;">Current TLB State</h3>
                         <div class="table-container">
                             <table>
@@ -1033,9 +1093,10 @@
                     <!-- TLB Simulation Results -->
                     <div style="background: var(--light); border-radius: var(--border-radius); padding: 1.5rem;">
                         <h3 style="color: var(--primary); margin-bottom: 1rem;">Simulation Results</h3>
-                        
+
                         <!-- Current Step -->
-                        <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: var(--border-radius);" id="tlb-current-step">
+                        <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: var(--border-radius);"
+                            id="tlb-current-step">
                             <strong>Current Step:</strong> <span id="tlb-step-info">-</span>
                         </div>
 
@@ -1079,31 +1140,43 @@
                         </div>
 
                         <!-- Comparison Section -->
-                        <div style="margin-top: 1.5rem; padding: 1rem; background: white; border-radius: var(--border-radius); border-left: 4px solid var(--secondary);">
+                        <div
+                            style="margin-top: 1.5rem; padding: 1rem; background: white; border-radius: var(--border-radius); border-left: 4px solid var(--secondary);">
                             <h4 style="color: var(--primary); margin-bottom: 1rem;">Access Time Comparison</h4>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                                <div style="text-align: center; padding: 1rem; background: #e8f4fc; border-radius: var(--border-radius);">
+                            <div
+                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                                <div
+                                    style="text-align: center; padding: 1rem; background: #e8f4fc; border-radius: var(--border-radius);">
                                     <div style="font-size: 1.3rem; font-weight: bold; color: #2980b9;">WITH TLB</div>
                                     <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #555;">Total Time</div>
-                                    <div style="font-size: 1.8rem; font-weight: bold; color: #2980b9; margin-top: 0.5rem;" id="tlb-total-with">0 ns</div>
+                                    <div style="font-size: 1.8rem; font-weight: bold; color: #2980b9; margin-top: 0.5rem;"
+                                        id="tlb-total-with">0 ns</div>
                                     <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #666;">
-                                        Hits: <span id="tlb-with-hits">0</span> × <span id="tlb-with-hit-time">10</span>ns<br>
-                                        Misses: <span id="tlb-with-misses">0</span> × <span id="tlb-with-miss-time">100</span>ns
+                                        Hits: <span id="tlb-with-hits">0</span> × <span
+                                            id="tlb-with-hit-time">10</span>ns<br>
+                                        Misses: <span id="tlb-with-misses">0</span> × <span
+                                            id="tlb-with-miss-time">100</span>ns
                                     </div>
                                 </div>
-                                <div style="text-align: center; padding: 1rem; background: #fadbd8; border-radius: var(--border-radius);">
+                                <div
+                                    style="text-align: center; padding: 1rem; background: #fadbd8; border-radius: var(--border-radius);">
                                     <div style="font-size: 1.3rem; font-weight: bold; color: #c0392b;">WITHOUT TLB</div>
                                     <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #555;">Total Time</div>
-                                    <div style="font-size: 1.8rem; font-weight: bold; color: #c0392b; margin-top: 0.5rem;" id="tlb-total-without">0 ns</div>
+                                    <div style="font-size: 1.8rem; font-weight: bold; color: #c0392b; margin-top: 0.5rem;"
+                                        id="tlb-total-without">0 ns</div>
                                     <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #666;">
-                                        All accesses: <span id="tlb-all-accesses">0</span> × <span id="tlb-without-time">100</span>ns
+                                        All accesses: <span id="tlb-all-accesses">0</span> × <span
+                                            id="tlb-without-time">100</span>ns
                                     </div>
                                 </div>
                             </div>
-                            <div style="margin-top: 1rem; padding: 1rem; background: #d5f4e6; border-radius: var(--border-radius); text-align: center;">
-                                <strong style="color: #27ae60;">Time Saved:</strong> <span id="tlb-time-saved">0</span> ns
+                            <div
+                                style="margin-top: 1rem; padding: 1rem; background: #d5f4e6; border-radius: var(--border-radius); text-align: center;">
+                                <strong style="color: #27ae60;">Time Saved:</strong> <span id="tlb-time-saved">0</span>
+                                ns
                                 <br>
-                                <span style="font-size: 0.9rem; color: #555;">Speedup: <span id="tlb-speedup">1.00</span>x</span>
+                                <span style="font-size: 0.9rem; color: #555;">Speedup: <span
+                                        id="tlb-speedup">1.00</span>x</span>
                             </div>
                         </div>
                     </div>
@@ -1136,7 +1209,8 @@
                     <label for="memory-required">Memory Required (KB)</label>
                     <input type="number" id="memory-required" min="4" max="64" value="20" required>
                 </div>
-                <button type="submit" class="btn btn-success" style="width: 100%; margin-top: 1rem;">Add Process</button>
+                <button type="submit" class="btn btn-success" style="width: 100%; margin-top: 1rem;">Add
+                    Process</button>
             </form>
         </div>
     </div>
@@ -1230,7 +1304,7 @@
                         freeFrame.lastAccess = 0;
                     }
                 }
-                
+
                 pageTable.push({
                     pageNo: i,
                     valid: isValid && frameNo !== -1,
@@ -1265,26 +1339,26 @@
         function renderMemoryFrames() {
             const container = document.getElementById('memory-frames');
             container.innerHTML = '';
-            
+
             memory.forEach(frame => {
                 const frameDiv = document.createElement('div');
                 frameDiv.className = `frame ${frame.occupied ? 'used' : 'free'}`;
                 frameDiv.innerHTML = `
                     <div class="frame-header">Frame ${frame.id}</div>
                     <div class="frame-content">
-                        ${frame.occupied ? 
-                            `Process: ${frame.processId}<br>
+                        ${frame.occupied ?
+                        `Process: ${frame.processId}<br>
                              Page: ${frame.pageNo}<br>
                              R-bit: ${frame.referenceBit}<br>
-                             M-bit: ${frame.modifyBit}` 
-                            : 'FREE'}
+                             M-bit: ${frame.modifyBit}`
+                        : 'FREE'}
                     </div>
-                    ${frame.occupied ? '<div class="status-badge badge-danger">Used</div>' : 
-                                       '<div class="status-badge badge-success">Free</div>'}
+                    ${frame.occupied ? '<div class="status-badge badge-danger">Used</div>' :
+                        '<div class="status-badge badge-success">Free</div>'}
                 `;
                 container.appendChild(frameDiv);
             });
-            
+
             updateMemoryStats();
         }
 
@@ -1293,7 +1367,7 @@
             const usedFrames = memory.filter(f => f.occupied).length;
             const freeFrames = 10 - usedFrames;
             const utilization = (usedFrames / 10 * 100).toFixed(1);
-            
+
             document.getElementById('total-frames').textContent = 10;
             document.getElementById('used-frames').textContent = usedFrames;
             document.getElementById('free-frames').textContent = freeFrames;
@@ -1304,7 +1378,7 @@
         function renderProcessTable() {
             const container = document.getElementById('process-table-body');
             container.innerHTML = '';
-            
+
             processes.forEach(process => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -1327,7 +1401,7 @@
         function renderPageTables() {
             const container = document.getElementById('page-tables-container');
             container.innerHTML = '';
-            
+
             processes.forEach(process => {
                 const table = document.createElement('div');
                 table.innerHTML = `
@@ -1351,7 +1425,7 @@
                     </div>
                 `;
                 container.appendChild(table);
-                
+
                 const tbody = document.getElementById(`page-table-${process.id}`);
                 tbody.innerHTML = '';
                 process.pageTable.forEach(page => {
@@ -1373,7 +1447,7 @@
         function renderSegmentTable() {
             const container = document.getElementById('segment-table-body');
             container.innerHTML = '';
-            
+
             const process = processes[0]; // Show first process
             process.segmentTable.forEach(segment => {
                 const row = document.createElement('tr');
@@ -1406,11 +1480,11 @@
             document.querySelectorAll('.card').forEach(card => {
                 card.style.display = 'none';
             });
-            
+
             // Show selected section
             document.getElementById(`${section}-section`).style.display = 'block';
             event.target.closest('.menu-item').classList.add('active');
-            
+
             logEvent(`Switched to ${section} view`, 'info');
         }
 
@@ -1418,12 +1492,12 @@
         function useCustomOffset() {
             const offsetInput = document.getElementById('custom-offset');
             const offset = parseInt(offsetInput.value);
-            
+
             if (isNaN(offset) || offset < 0 || offset >= PAGE_SIZE_BYTES) {
                 alert(`Please enter a valid offset between 0 and ${PAGE_SIZE_BYTES - 1}`);
                 return;
             }
-            
+
             simulateAddressTranslation(offset);
         }
 
@@ -1433,23 +1507,23 @@
             const pageNo = Math.floor(Math.random() * process.pages);
             const offset = customOffset !== null ? customOffset : Math.floor(Math.random() * PAGE_SIZE_BYTES);
             const logicalAddress = (pageNo * PAGE_SIZE_BYTES) + offset;
-            
+
             const page = process.pageTable[pageNo];
             const resultDiv = document.getElementById('translation-result');
-            
+
             // Update display
             document.getElementById('logical-address').textContent = `0x${logicalAddress.toString(16).padStart(4, '0')}`;
             document.getElementById('logical-page').textContent = pageNo;
             document.getElementById('logical-offset').textContent = offset;
-            
+
             if (page.valid) {
                 const frameNo = page.frameNo;
                 const physicalAddress = (frameNo * PAGE_SIZE_BYTES) + offset;
-                
+
                 document.getElementById('physical-address').textContent = `0x${physicalAddress.toString(16).padStart(4, '0')}`;
                 document.getElementById('physical-frame').textContent = frameNo;
                 document.getElementById('physical-offset').textContent = offset;
-                
+
                 resultDiv.className = 'alert alert-success';
                 resultDiv.innerHTML = `
                     ✓ Translation successful!<br>
@@ -1460,13 +1534,13 @@
                     Physical Address: Frame ${frameNo} × ${PAGE_SIZE_BYTES} + ${offset} = 0x${physicalAddress.toString(16)}
                 `;
                 resultDiv.style.display = 'block';
-                
+
                 logEvent(`Address translation: 0x${logicalAddress.toString(16)} → 0x${physicalAddress.toString(16)}`, 'info');
             } else {
                 document.getElementById('physical-address').textContent = '0x0000';
                 document.getElementById('physical-frame').textContent = '-';
                 document.getElementById('physical-offset').textContent = '-';
-                
+
                 resultDiv.className = 'alert alert-danger';
                 resultDiv.innerHTML = `
                     ✗ Page Fault!<br>
@@ -1474,7 +1548,7 @@
                     The OS needs to load this page from disk into a free frame
                 `;
                 resultDiv.style.display = 'block';
-                
+
                 logEvent(`Page fault for page ${pageNo}`, 'warning');
             }
         }
@@ -1483,12 +1557,12 @@
         function useSegmentOffset() {
             const offsetInput = document.getElementById('segment-offset');
             const offset = parseInt(offsetInput.value);
-            
+
             if (isNaN(offset) || offset < 0) {
                 alert('Please enter a valid non-negative offset');
                 return;
             }
-            
+
             simulateSegmentation(offset);
         }
 
@@ -1498,9 +1572,9 @@
             const segmentNo = Math.floor(Math.random() * process.segments);
             const segment = process.segmentTable[segmentNo];
             const offset = customOffset !== null ? customOffset : Math.floor(Math.random() * (segment.limit * 1024 * 2)); // May exceed limit
-            
+
             const resultDiv = document.getElementById('segmentation-result');
-            
+
             if (offset < segment.limit * 1024) {
                 const physicalAddress = segment.base * 1024 + offset;
                 resultDiv.className = 'alert alert-success';
@@ -1514,7 +1588,7 @@
                     Protection: ${segment.protection} (${getProtectionMeaning(segment.protection)})
                 `;
                 resultDiv.style.display = 'block';
-                
+
                 logEvent(`Segment access: Segment ${segmentNo}, Offset ${offset} (valid)`, 'info');
             } else {
                 resultDiv.className = 'alert alert-danger';
@@ -1527,7 +1601,7 @@
                     4. This violates memory protection → Program will be terminated
                 `;
                 resultDiv.style.display = 'block';
-                
+
                 logEvent(`Segmentation fault: Segment ${segmentNo}, Offset ${offset} exceeds limit ${segment.limit * 1024}`, 'error');
             }
         }
@@ -1551,27 +1625,27 @@
             if (isSimulating) {
                 return;
             }
-            
+
             // Get number of frames from user input
             const framesInput = document.getElementById('frames-input');
             let numFrames = parseInt(framesInput.value);
-            
+
             if (isNaN(numFrames) || numFrames < 1 || numFrames > 20) {
                 alert('Please enter a valid number of frames between 1 and 20');
                 return;
             }
-            
+
             currentAlgorithm = algorithm;
             referenceString = document.getElementById('ref-string').value
                 .split(' ')
                 .map(x => parseInt(x.trim()))
                 .filter(x => !isNaN(x));
-            
+
             if (referenceString.length === 0) {
                 alert('Please enter a valid reference string');
                 return;
             }
-            
+
             isSimulating = true;
             simulationIndex = 0;
             pageHits = 0;
@@ -1579,7 +1653,7 @@
             frameSequence = [];
             replacementTable = [];
             clockPointer = 0;
-            
+
             // Initialize simulation memory with user-defined number of frames
             simulationMemory = [];
             for (let i = 0; i < numFrames; i++) {
@@ -1593,36 +1667,36 @@
                     lastAccess: -1
                 });
             }
-            
+
             // Initialize replacement table
             initReplacementTable(numFrames);
-            
+
             // Show UI elements
             document.getElementById('current-step').style.display = 'flex';
             document.getElementById('replacement-table-container').style.display = 'block';
             document.getElementById('simulation-frames').style.display = 'grid';
             document.getElementById('algorithm-summary').style.display = 'block';
             document.getElementById('stop-btn').style.display = 'inline-block';
-            
+
             // Update algorithm name and frames count
             document.getElementById('summary-algorithm').textContent = algorithm;
             document.getElementById('summary-frames').textContent = numFrames;
-            
+
             // Render simulation frames
             renderSimulationFrames();
-            
+
             updateStatistics();
-            
+
             // Update button text
             document.querySelectorAll('#replacement-section .btn').forEach(btn => {
-                if (btn.textContent.includes('FIFO') || btn.textContent.includes('LRU') || 
+                if (btn.textContent.includes('FIFO') || btn.textContent.includes('LRU') ||
                     btn.textContent.includes('Optimal') || btn.textContent.includes('Clock')) {
                     btn.disabled = true;
                 }
             });
-            
+
             logEvent(`Starting ${algorithm} simulation with ${numFrames} frames and reference string: ${referenceString.join(' ')}`, 'info');
-            
+
             // Start simulation loop
             const speed = document.getElementById('speed-slider').value;
             simulationInterval = setInterval(simulationStep, 1000 - speed + 100);
@@ -1632,18 +1706,18 @@
         function initReplacementTable(numFrames) {
             const header = document.getElementById('replacement-table-header');
             const body = document.getElementById('replacement-table-body');
-            
+
             // Clear existing content
             header.innerHTML = '';
             body.innerHTML = '';
-            
+
             // Create header
             header.innerHTML = '<th>Step</th><th>Page</th>';
             for (let i = 0; i < numFrames; i++) {
                 header.innerHTML += `<th>Frame ${i}</th>`;
             }
             header.innerHTML += '<th>Hit/Miss</th><th>Replaced</th>';
-            
+
             // Initialize empty rows
             for (let i = 0; i < referenceString.length; i++) {
                 const row = document.createElement('tr');
@@ -1662,7 +1736,7 @@
         function renderSimulationFrames() {
             const container = document.getElementById('simulation-frames');
             container.innerHTML = '';
-            
+
             simulationMemory.forEach(frame => {
                 const frameDiv = document.createElement('div');
                 frameDiv.className = `frame ${frame.occupied ? 'used' : 'free'}`;
@@ -1670,14 +1744,14 @@
                 frameDiv.innerHTML = `
                     <div class="frame-header">Frame ${frame.id}</div>
                     <div class="frame-content">
-                        ${frame.occupied ? 
-                            `Page: ${frame.pageNo}<br>
+                        ${frame.occupied ?
+                        `Page: ${frame.pageNo}<br>
                              R-bit: ${frame.referenceBit}<br>
-                             M-bit: ${frame.modifyBit}` 
-                            : 'FREE'}
+                             M-bit: ${frame.modifyBit}`
+                        : 'FREE'}
                     </div>
-                    ${frame.occupied ? '<div class="status-badge badge-danger">Used</div>' : 
-                                       '<div class="status-badge badge-success">Free</div>'}
+                    ${frame.occupied ? '<div class="status-badge badge-danger">Used</div>' :
+                        '<div class="status-badge badge-success">Free</div>'}
                 `;
                 container.appendChild(frameDiv);
             });
@@ -1690,19 +1764,19 @@
                 showFinalResults();
                 return;
             }
-            
+
             const pageNo = referenceString[simulationIndex];
             const time = simulationIndex + 1;
-            
+
             // Update current step display
             document.getElementById('step-number').textContent = time;
             document.getElementById('step-page').textContent = pageNo;
-            
+
             // Check if page is in memory
             let frameNo = -1;
             let pageFound = false;
             let replacedPage = -1;
-            
+
             for (let i = 0; i < simulationMemory.length; i++) {
                 if (simulationMemory[i].occupied && simulationMemory[i].pageNo === pageNo) {
                     frameNo = i;
@@ -1710,21 +1784,21 @@
                     break;
                 }
             }
-            
+
             if (pageFound) {
                 // Page hit
                 pageHits++;
                 simulationMemory[frameNo].lastAccess = time;
                 simulationMemory[frameNo].referenceBit = 1;
-                
+
                 document.getElementById('step-result-type').className = 'step-result step-hit';
                 document.getElementById('step-result-type').textContent = 'HIT';
-                
+
                 logEvent(`Time ${time}: Page ${pageNo} HIT in frame ${frameNo}`, 'info');
             } else {
                 // Page fault
                 pageFaults++;
-                
+
                 // Find frame to replace
                 if (frameSequence.length < simulationMemory.length) {
                     // There's still free frames
@@ -1753,7 +1827,7 @@
                             break;
                     }
                 }
-                
+
                 // Update memory
                 simulationMemory[frameNo].occupied = true;
                 simulationMemory[frameNo].pageNo = pageNo;
@@ -1761,26 +1835,26 @@
                 simulationMemory[frameNo].referenceBit = 1;
                 simulationMemory[frameNo].modifyBit = Math.random() > 0.5 ? 1 : 0;
                 simulationMemory[frameNo].processId = 1; // Assign to process 1
-                
+
                 document.getElementById('step-result-type').className = 'step-result step-miss';
                 document.getElementById('step-result-type').textContent = 'MISS';
-                
+
                 logEvent(`Time ${time}: Page ${pageNo} FAULT, loaded into frame ${frameNo} ${replacedPage >= 0 ? '(replaced page ' + replacedPage + ')' : ''}`, 'warning');
             }
-            
+
             // Update replacement table
             updateReplacementTable(simulationIndex, frameNo, pageFound, replacedPage);
-            
+
             // Update statistics and frames display
             updateStatistics();
             updateSummary();
             renderSimulationFrames();
-            
+
             // Highlight current frame
             highlightSimulationFrame(frameNo, pageFound);
-            
+
             simulationIndex++;
-            
+
             // If simulation is complete
             if (simulationIndex >= referenceString.length) {
                 stopSimulation();
@@ -1792,7 +1866,7 @@
         function updateReplacementTable(stepIndex, frameNo, isHit, replacedPage) {
             const rows = document.getElementById('replacement-table-body').rows;
             const row = rows[stepIndex];
-            
+
             // Update frame cells
             for (let i = 0; i < simulationMemory.length; i++) {
                 const cell = row.cells[i + 2]; // Skip step and page columns
@@ -1804,7 +1878,7 @@
                     cell.className = '';
                 }
             }
-            
+
             // Update hit/miss cell
             const hitMissCell = row.cells[simulationMemory.length + 2];
             if (isHit) {
@@ -1814,7 +1888,7 @@
                 hitMissCell.textContent = 'MISS';
                 hitMissCell.className = 'miss-cell';
             }
-            
+
             // Update replaced cell
             const replacedCell = row.cells[simulationMemory.length + 3];
             if (replacedPage >= 0) {
@@ -1827,7 +1901,7 @@
                 replacedCell.textContent = '-';
                 replacedCell.className = '';
             }
-            
+
             // Scroll to current row
             row.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
@@ -1836,14 +1910,14 @@
         function findLRUFrame() {
             let lruFrame = 0;
             let minTime = Infinity;
-            
+
             for (let i = 0; i < simulationMemory.length; i++) {
                 if (simulationMemory[i].occupied && simulationMemory[i].lastAccess < minTime) {
                     minTime = simulationMemory[i].lastAccess;
                     lruFrame = i;
                 }
             }
-            
+
             return lruFrame;
         }
 
@@ -1851,12 +1925,12 @@
         function findOptimalFrame() {
             let optimalFrame = 0;
             let farthestUse = -1;
-            
+
             for (let i = 0; i < simulationMemory.length; i++) {
                 if (simulationMemory[i].occupied) {
                     const page = simulationMemory[i].pageNo;
                     let nextUse = Infinity;
-                    
+
                     // Find next use of this page
                     for (let j = simulationIndex + 1; j < referenceString.length; j++) {
                         if (referenceString[j] === page) {
@@ -1864,14 +1938,14 @@
                             break;
                         }
                     }
-                    
+
                     if (nextUse > farthestUse) {
                         farthestUse = nextUse;
                         optimalFrame = i;
                     }
                 }
             }
-            
+
             return optimalFrame;
         }
 
@@ -1879,12 +1953,12 @@
         function findClockFrame() {
             // Find starting point
             let start = clockPointer;
-            
+
             while (true) {
                 if (!simulationMemory[clockPointer].occupied) {
                     return clockPointer;
                 }
-                
+
                 if (simulationMemory[clockPointer].referenceBit === 0) {
                     const selected = clockPointer;
                     clockPointer = (clockPointer + 1) % simulationMemory.length;
@@ -1893,9 +1967,9 @@
                     // Give second chance
                     simulationMemory[clockPointer].referenceBit = 0;
                 }
-                
+
                 clockPointer = (clockPointer + 1) % simulationMemory.length;
-                
+
                 // Prevent infinite loop
                 if (clockPointer === start) {
                     // All pages have reference bit = 1, reset all
@@ -1917,10 +1991,10 @@
                 frame.style.backgroundColor = '';
                 frame.style.borderColor = '';
             });
-            
+
             if (frameNo >= 0 && frames[frameNo]) {
                 frames[frameNo].classList.add('selected');
-                
+
                 // Add visual feedback
                 const frameEl = frames[frameNo];
                 frameEl.style.backgroundColor = isHit ? '#d5f4e6' : '#fadbd8';
@@ -1942,9 +2016,13 @@
             const total = pageHits + pageFaults;
             const hitRatio = total > 0 ? (pageHits / total * 100).toFixed(1) : 0;
             const faultRatio = total > 0 ? (pageFaults / total * 100).toFixed(1) : 0;
-            
+
             logEvent(`Simulation completed! Results: ${pageHits} hits, ${pageFaults} faults, Hit Ratio: ${hitRatio}%`, 'info');
-            
+
+            // Generate comparative stats
+            const comparativeResults = simulateAllAlgorithms(simulationMemory.length, referenceString);
+            const comparativeTableHtml = renderComparativeTable(comparativeResults);
+
             // Show final message
             const visualizationArea = document.getElementById('algorithm-visualization');
             visualizationArea.innerHTML = `
@@ -1976,27 +2054,206 @@
                             <strong>Configuration:</strong> ${simulationMemory.length} frames | ${currentAlgorithm} algorithm
                         </div>
                     </div>
+                    
+                    ${comparativeTableHtml}
+                    
                     <button class="btn btn-primary" onclick="resetPageReplacement()" style="margin-top: 2rem;">Run Another Simulation</button>
                 </div>
             `;
+        }
+
+        // Simulate all algorithms to get comparative stats
+        function simulateAllAlgorithms(frames, refString) {
+            const algos = ['FIFO', 'LRU', 'OPTIMAL', 'CLOCK'];
+            const results = [];
+
+            algos.forEach(algo => {
+                const stats = calculateStatsForAlgo(algo, frames, refString);
+                results.push({
+                    algorithm: algo,
+                    hits: stats.hits,
+                    faults: stats.faults,
+                    hitRatio: stats.hitRatio
+                });
+            });
+
+            return results;
+        }
+
+        // Calculate stats for a specific algorithm (without UI updates)
+        function calculateStatsForAlgo(algo, numFrames, refStr) {
+            let simMem = [];
+            for (let i = 0; i < numFrames; i++) {
+                simMem.push({ occupied: false, pageNo: -1, lastAccess: -1, referenceBit: 0 });
+            }
+
+            let hits = 0;
+            let faults = 0;
+            let frameSeq = []; // For FIFO
+            let clockPtr = 0; // For CLOCK
+
+            for (let i = 0; i < refStr.length; i++) {
+                const page = refStr[i];
+                const time = i + 1;
+                let pageFound = false;
+                let frameNo = -1;
+
+                // Check contents
+                for (let j = 0; j < simMem.length; j++) {
+                    if (simMem[j].occupied && simMem[j].pageNo === page) {
+                        frameNo = j;
+                        pageFound = true;
+                        break;
+                    }
+                }
+
+                if (pageFound) {
+                    hits++;
+                    simMem[frameNo].lastAccess = time;
+                    simMem[frameNo].referenceBit = 1;
+                } else {
+                    faults++;
+                    // Replacement logic
+                    if (frameSeq.length < simMem.length) {
+                        frameNo = frameSeq.length;
+                        frameSeq.push(frameNo);
+                    } else {
+                        switch (algo) {
+                            case 'FIFO':
+                                frameNo = frameSeq[0];
+                                frameSeq.shift();
+                                frameSeq.push(frameNo);
+                                break;
+                            case 'LRU':
+                                let minTime = Infinity;
+                                for (let k = 0; k < simMem.length; k++) {
+                                    if (simMem[k].occupied && simMem[k].lastAccess < minTime) {
+                                        minTime = simMem[k].lastAccess;
+                                        frameNo = k;
+                                    }
+                                }
+                                break;
+                            case 'OPTIMAL':
+                                let farthest = -1;
+                                for (let k = 0; k < simMem.length; k++) {
+                                    let nextUse = Infinity;
+                                    for (let m = i + 1; m < refStr.length; m++) {
+                                        if (refStr[m] === simMem[k].pageNo) {
+                                            nextUse = m;
+                                            break;
+                                        }
+                                    }
+                                    if (nextUse > farthest) {
+                                        farthest = nextUse;
+                                        frameNo = k;
+                                    }
+                                }
+                                break;
+                            case 'CLOCK':
+                                while (true) {
+                                    if (simMem[clockPtr].referenceBit === 0) {
+                                        frameNo = clockPtr;
+                                        clockPtr = (clockPtr + 1) % simMem.length;
+                                        break;
+                                    }
+                                    simMem[clockPtr].referenceBit = 0;
+                                    clockPtr = (clockPtr + 1) % simMem.length;
+                                }
+                                break;
+                        }
+                    }
+
+                    simMem[frameNo].occupied = true;
+                    simMem[frameNo].pageNo = page;
+                    simMem[frameNo].lastAccess = time;
+                    simMem[frameNo].referenceBit = 1;
+                }
+            }
+
+            return {
+                hits: hits,
+                faults: faults,
+                hitRatio: (hits / (hits + faults) * 100).toFixed(1)
+            };
+        }
+
+        // Render comparative table
+        function renderComparativeTable(results) {
+            // Find max and min hit ratios
+            const maxRatio = Math.max(...results.map(r => parseFloat(r.hitRatio)));
+            const minRatio = Math.min(...results.map(r => parseFloat(r.hitRatio)));
+
+            let html = `
+                <div style="margin-top: 2rem; background: white; padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--box-shadow);">
+                    <h3 style="color: var(--primary); margin-bottom: 1rem; text-align: center;">Algorithm Performance Comparison</h3>
+                    <div class="table-container">
+                        <table class="stats-comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>Algorithm</th>
+                                    <th>Hits</th>
+                                    <th>Faults</th>
+                                    <th>Hit Ratio</th>
+                                    <th>Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+
+            results.forEach(res => {
+                let rowClass = '';
+                let perfText = 'Intermediate';
+                const ratio = parseFloat(res.hitRatio);
+
+                if (maxRatio === minRatio) {
+                    rowClass = 'stats-best';
+                    perfText = 'Equal';
+                } else if (ratio === maxRatio) {
+                    rowClass = 'stats-best';
+                    perfText = 'Best';
+                } else if (ratio === minRatio) {
+                    rowClass = 'stats-worst';
+                    perfText = 'Worst';
+                } else {
+                    rowClass = 'stats-intermediate';
+                }
+
+                html += `
+                    <tr class="${rowClass}">
+                        <td>${res.algorithm}</td>
+                        <td>${res.hits}</td>
+                        <td>${res.faults}</td>
+                        <td>${res.hitRatio}%</td>
+                        <td>${perfText}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            return html;
         }
 
         // Stop simulation
         function stopSimulation() {
             isSimulating = false;
             clearInterval(simulationInterval);
-            
+
             // Enable algorithm buttons
             document.querySelectorAll('#replacement-section .btn').forEach(btn => {
-                if (btn.textContent.includes('FIFO') || btn.textContent.includes('LRU') || 
+                if (btn.textContent.includes('FIFO') || btn.textContent.includes('LRU') ||
                     btn.textContent.includes('Optimal') || btn.textContent.includes('Clock')) {
                     btn.disabled = false;
                 }
             });
-            
+
             // Hide stop button
             document.getElementById('stop-btn').style.display = 'none';
-            
+
             logEvent('Simulation stopped', 'info');
         }
 
@@ -2014,13 +2271,13 @@
         // Reset page replacement only
         function resetPageReplacement() {
             stopSimulation();
-            
+
             // Reset UI elements
             document.getElementById('current-step').style.display = 'none';
             document.getElementById('replacement-table-container').style.display = 'none';
             document.getElementById('simulation-frames').style.display = 'none';
             document.getElementById('algorithm-summary').style.display = 'none';
-            
+
             // Reset visualization area
             const visualizationArea = document.getElementById('algorithm-visualization');
             visualizationArea.innerHTML = `
@@ -2029,12 +2286,12 @@
                     Enter number of frames (1-20), then select an algorithm to start
                 </p>
             `;
-            
+
             // Reset statistics
             pageHits = 0;
             pageFaults = 0;
             updateStatistics();
-            
+
             logEvent('Page replacement simulation reset', 'info');
         }
 
@@ -2044,13 +2301,13 @@
                 alert(`Maximum ${MAX_PROCESSES} processes allowed`);
                 return;
             }
-            
+
             const processNames = ['Browser', 'Editor', 'Terminal', 'Player', 'Compiler'];
             const name = processNames[Math.floor(Math.random() * processNames.length)];
             const pages = Math.floor(Math.random() * 8) + 3;
             const segments = Math.floor(Math.random() * 4) + 2;
             const memory = pages * PAGE_SIZE;
-            
+
             const newProcess = {
                 id: ++currentProcessId,
                 name: name,
@@ -2061,11 +2318,11 @@
                 pageTable: generatePageTable(pages),
                 segmentTable: generateSegmentTable(segments)
             };
-            
+
             processes.push(newProcess);
             renderProcessTable();
             renderPageTables();
-            
+
             logEvent(`Added new process: ${name} (PID: ${newProcess.id})`, 'info');
         }
 
@@ -2080,19 +2337,19 @@
         }
 
         // Add process from form
-        document.getElementById('process-form').addEventListener('submit', function(e) {
+        document.getElementById('process-form').addEventListener('submit', function (e) {
             e.preventDefault();
-            
+
             if (processes.length >= MAX_PROCESSES) {
                 alert(`Maximum ${MAX_PROCESSES} processes allowed`);
                 return;
             }
-            
+
             const name = document.getElementById('process-name').value;
             const pages = parseInt(document.getElementById('num-pages').value);
             const segments = parseInt(document.getElementById('num-segments').value);
             const memory = parseInt(document.getElementById('memory-required').value);
-            
+
             const newProcess = {
                 id: ++currentProcessId,
                 name: name,
@@ -2103,14 +2360,14 @@
                 pageTable: generatePageTable(pages),
                 segmentTable: generateSegmentTable(segments)
             };
-            
+
             processes.push(newProcess);
             renderProcessTable();
             renderPageTables();
             closeAddProcessModal();
-            
+
             logEvent(`Added new process: ${name} (PID: ${newProcess.id})`, 'info');
-            
+
             // Reset form
             this.reset();
         });
@@ -2121,23 +2378,23 @@
                 alert('Cannot remove system process');
                 return;
             }
-            
+
             const index = processes.findIndex(p => p.id === pid);
             if (index > -1) {
                 const process = processes[index];
-                
+
                 // Free memory occupied by this process
                 process.pageTable.forEach(page => {
                     if (page.valid && page.frameNo >= 0) {
                         memory[page.frameNo].occupied = false;
                     }
                 });
-                
+
                 processes.splice(index, 1);
                 renderProcessTable();
                 renderPageTables();
                 renderMemoryFrames();
-                
+
                 logEvent(`Removed process: PID ${pid}`, 'info');
             }
         }
@@ -2158,10 +2415,10 @@
                 if (memory[i].occupied) {
                     if (i !== freeIndex) {
                         // Move frame
-                        memory[freeIndex] = {...memory[i]};
+                        memory[freeIndex] = { ...memory[i] };
                         memory[i].occupied = false;
                         memory[i].pageNo = -1;
-                        
+
                         // Update page tables
                         processes.forEach(process => {
                             process.pageTable.forEach(page => {
@@ -2174,7 +2431,7 @@
                     freeIndex++;
                 }
             }
-            
+
             // Fill remaining frames as free
             for (let i = freeIndex; i < memory.length; i++) {
                 memory[i] = {
@@ -2187,10 +2444,10 @@
                     lastAccess: -1
                 };
             }
-            
+
             renderMemoryFrames();
             renderPageTables();
-            
+
             logEvent('Memory compaction completed', 'info');
         }
 
@@ -2211,7 +2468,7 @@
         function logEvent(message, type) {
             const logContainer = document.getElementById('simulation-log');
             if (!logContainer) return;
-            
+
             const entry = document.createElement('div');
             entry.className = 'log-entry';
             entry.innerHTML = `
@@ -2241,7 +2498,7 @@
         function renderTLBTable() {
             const tbody = document.getElementById('tlb-table-body');
             tbody.innerHTML = '';
-            
+
             tlbEntries.forEach(entry => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -2310,7 +2567,7 @@
 
                 // Check if page is in TLB
                 const tlbEntry = tlbEntries.find(e => e.valid && e.virtualPage === page);
-                
+
                 if (tlbEntry) {
                     // TLB HIT
                     isHit = true;
@@ -2393,12 +2650,12 @@
             // Update comparison section
             document.getElementById('tlb-total-with').textContent = `${totalTimeWithTLB} ns`;
             document.getElementById('tlb-total-without').textContent = `${totalTimeWithoutTLB} ns`;
-            
+
             document.getElementById('tlb-with-hits').textContent = tlbHits;
             document.getElementById('tlb-with-hit-time').textContent = hitTime;
             document.getElementById('tlb-with-misses').textContent = tlbMisses;
             document.getElementById('tlb-with-miss-time').textContent = missTime;
-            
+
             document.getElementById('tlb-all-accesses').textContent = total;
             document.getElementById('tlb-without-time').textContent = missTime;
 
@@ -2425,17 +2682,17 @@
             tlbMisses = 0;
             tlbSimulationData = [];
             initializeTLB();
-            
+
             // Clear results table
             document.getElementById('tlb-results-table').innerHTML = '';
-            
+
             // Reset statistics display
             document.getElementById('tlb-hits-count').textContent = '0';
             document.getElementById('tlb-misses-count').textContent = '0';
             document.getElementById('tlb-hit-ratio').textContent = '0%';
             document.getElementById('tlb-avg-time').textContent = '0 ns';
             document.getElementById('tlb-step-info').textContent = '-';
-            
+
             // Reset comparison
             document.getElementById('tlb-total-with').textContent = '0 ns';
             document.getElementById('tlb-total-without').textContent = '0 ns';
@@ -2449,4 +2706,5 @@
         document.addEventListener('DOMContentLoaded', initSystem);
     </script>
 </body>
+
 </html>
